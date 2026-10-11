@@ -107,3 +107,15 @@ describe("Gemini retry", () => {
     expect(generate).toHaveBeenCalledTimes(2);
   });
 });
+
+import { scrubClusterIds } from "@/lib/gemini/analyze";
+describe("brief copy", () => {
+  it("replaces leaked cluster ids with topic names but keeps clusterId fields", () => {
+    const out = scrubClusterIds(
+      { clusterId: "c2", why: "Cluster c2 perfectly targets your niche, unlike [c1]. Pick c2." },
+      { c1: "Phone deals", c2: "Meta Muse" },
+    );
+    expect(out.clusterId).toBe("c2");
+    expect(out.why).toBe("Meta Muse perfectly targets your niche, unlike Phone deals. Pick Meta Muse.");
+  });
+});

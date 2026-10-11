@@ -48,14 +48,14 @@ export function RecommendationSection({ cluster, creatorName }: { cluster: Trend
             <dd className="text-2xl font-bold">{r.format}</dd>
             {lead && (
               <dd className="text-xs text-fg-3">
-                Leading format in this cluster: {lead.format} ({Math.round(lead.share * 100)}% of classified videos)
+                Most common here: {lead.format} ({Math.round(lead.share * 100)}%)
               </dd>
             )}
           </div>
           <div className="flex flex-col gap-2 bg-bg p-5">
             <dt className="micro flex items-center gap-2 text-fg-3">Suggested length <Provenance kind="calculated" /></dt>
             <dd className="tabular text-2xl font-bold">{cluster.suggestedLengthSeconds ? `~${Math.round(cluster.suggestedLengthSeconds / 60)} min` : "—"}</dd>
-            <dd className="text-xs text-fg-3">Median of the faster half · cluster avg {formatDurationWords(cluster.metrics.avgDurationSeconds)}</dd>
+            <dd className="text-xs text-fg-3">Like the best-performing videos here (average {formatDurationWords(cluster.metrics.avgDurationSeconds)})</dd>
           </div>
           <div className="flex flex-col gap-2 bg-bg p-5">
             <dt className="micro flex items-center gap-2 text-fg-3">Confidence <Provenance kind="calculated" /></dt>

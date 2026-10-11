@@ -18,7 +18,7 @@ export default async function BriefPage() {
             <ErrorState compact title="History unavailable" message={data.dbError} />
           </div>
         )}
-        <EmptyState title="NO BRIEF YET." body="The Sunday Brief is written from a saved radar scan. Run the radar and the brief is generated with it — or wait for the Sunday morning cron." />
+        <EmptyState title="NO BRIEF YET." body="Run the radar and the brief is written with it. A new one also arrives every Sunday morning." />
       </div>
     );
   }
@@ -27,7 +27,7 @@ export default async function BriefPage() {
       <section className="mx-auto flex min-h-[70vh] max-w-5xl flex-col justify-center gap-6 px-4 md:px-10">
         <span className="micro text-signal">Sunday Brief</span>
         <h1 className="display-xl text-5xl md:text-8xl">THE SCAN IS IN. THE BRIEF ISN&apos;T WRITTEN YET.</h1>
-        <p className="max-w-xl font-serif text-xl text-fg-2">Gemini Flash will turn the latest scan into this week&apos;s editorial brief. It takes 10–30 seconds.</p>
+        <p className="max-w-xl font-serif text-xl text-fg-2">Turn the latest scan into this week&apos;s brief. Takes about 20 seconds.</p>
         <div className="self-start">
           <GenerateBriefButton runId={data.run.id} />
         </div>

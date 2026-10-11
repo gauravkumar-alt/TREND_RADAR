@@ -45,7 +45,7 @@ export function RadarExperience({ serverRun, failure, regionCode, categories, cr
 
       {(missing.length > 0 || dbError) && (
         <div className="mx-auto flex max-w-[1600px] flex-col gap-3 px-4 py-6 md:px-8">
-          {missing.length > 0 && <ErrorState compact title="Setup needed" message={`Missing server keys: ${missing.join(", ")}. Add them to the environment to run live scans.`} />}
+          {missing.length > 0 && <ErrorState compact title="Setup needed" message={`Live scans need ${missing.join(" and ")} set on the server.`} />}
           {dbError && <ErrorState compact title="History unavailable" message={dbError} />}
         </div>
       )}
@@ -53,7 +53,7 @@ export function RadarExperience({ serverRun, failure, regionCode, categories, cr
       {!run || !top ? (
         <EmptyState
           title={run ? "NO STRONG SIGNALS YET." : "THE RADAR HASN'T SCANNED YET."}
-          body={run ? "Try expanding your lookback window or adding another category." : "Run the radar to pull live YouTube data for your categories and find this week's conversations."}
+          body={run ? "Try expanding your lookback window or adding another category." : "Run the radar to find this week's conversations in your categories."}
         />
       ) : (
         <>

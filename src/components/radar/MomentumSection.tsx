@@ -72,7 +72,7 @@ export function MomentumSection({ cluster }: { cluster: TrendCluster }) {
             <div>
               <dt className="micro text-fg-3">Coverage change</dt>
               <dd className="tabular text-2xl font-semibold">{m.coverageGrowth == null ? "—" : signedPct(m.coverageGrowth)}</dd>
-              <dd className="text-xs text-fg-3">newer vs older half of the window</dd>
+              <dd className="text-xs text-fg-3">recent days vs the days before</dd>
             </div>
             <div>
               <dt className="micro text-fg-3">Uploads, last 72h</dt>

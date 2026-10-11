@@ -1,4 +1,3 @@
-import { formatDurationWords } from "@/lib/youtube/duration";
 import { Provenance } from "@/components/shared/Provenance";
 import type { Brief, RadarRun } from "@/lib/types";
 
@@ -32,8 +31,8 @@ export function MondayPlan({ brief, run }: { brief: Brief; run: RadarRun }) {
         </dl>
         {c && (
           <p data-reveal className="micro">
-            Backed by: {c.metrics.creatorCount} creators · {c.metrics.videoCount} videos · momentum {c.momentum} · trend score {c.score} · aim for ~
-            {c.suggestedLengthSeconds ? Math.round(c.suggestedLengthSeconds / 60) : "—"} min (calculated; cluster average {formatDurationWords(c.metrics.avgDurationSeconds)})
+            Backed by {c.metrics.creatorCount} creators · {c.metrics.videoCount} videos · {c.momentum.toLowerCase()} · score {c.score}/100
+            {c.suggestedLengthSeconds ? ` · aim for about ${Math.round(c.suggestedLengthSeconds / 60)} min` : ""}
           </p>
         )}
       </div>

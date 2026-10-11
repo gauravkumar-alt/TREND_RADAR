@@ -1,6 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
 import { channelUrl, compact } from "@/lib/format";
-import { Provenance } from "@/components/shared/Provenance";
 import type { TrendCluster } from "@/lib/types";
 
 export function CreatorCoverage({ creators }: { creators: TrendCluster["creators"] }) {
@@ -9,8 +8,7 @@ export function CreatorCoverage({ creators }: { creators: TrendCluster["creators
     <div className="flex flex-col gap-4">
       <div className="flex items-baseline gap-3">
         <span className="tabular font-display text-5xl font-bold">{creators.length}</span>
-        <span className="micro text-fg-3">creators in this conversation</span>
-        <Provenance kind="observed" className="ml-auto" />
+        <span className="micro text-fg-3">creators covering this</span>
       </div>
       <ul className="divide-y divide-line border-y border-line">
         {shown.map((c) => (

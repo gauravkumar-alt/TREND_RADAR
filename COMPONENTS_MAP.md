@@ -105,6 +105,7 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | `RadarExperience` | Orders the scroll story; picks the newest run (server or session) | `RadarRun` | `loadPageData` → Supabase | — | `ScrollTrigger.refresh` after mount | `useCurrentRun` (context) |
 | `RadarHero` | Full-screen title, scope tags, last scan / videos analysed / active signals, CTAs, last-successful-scan banner | run, settings, failure | — | — | `heroIntro`: line mask → tagline → meta → dots → CTA last; grid drift | none |
+| `TopicOrbit` | The week's 3–4 topics as keyword + trend-score chips orbiting the radar; pause on hover/focus; link to `/trends#cN` | run.clusters (keyword from AI, score CALCULATED) | — | keyword | GSAP rotation timeline + counter-rotation, pop-in | none |
 | `RadarSignalField` | SVG radar; each dot is a real video (angle = cluster, radius = age, size = views/h) | run.clusters, signals | — | cluster labels (AI names) | `radarAmbient`: sweep rotation, dot breathing | memoised layout |
 | `StatementSection` | "Doesn't trend one video at a time" → "Trends in conversations" | static copy | — | — | `statementScene`: pin + scrub, word light-up, strike, clip-path reveal | none |
 | `ScrollVideoReel` | Scroll-controlled reel of the 5 fastest videos | `reelVideoIds`, videos, signals (OBSERVED + CALCULATED views/h) | — | — | `reelScene`: pin, scrub, **snap to labels**, clip-path + scale + text displacement + meta stagger, progress bar | counter via ref (no re-render) |
@@ -134,7 +135,7 @@ flowchart LR
 
 | Component | Purpose | Data | API | AI | Animation | State |
 |---|---|---|---|---|---|---|
-| `TrendOverview` | Header, sticky filter bar (category, region, lookback, momentum), run new radar, previous scans | run, history, settings | `loadPageData`, `POST /api/radar/run` | — | `revealOnScroll` on clusters | filter state (`useState`) |
+| `TrendOverview` | Header, at-a-glance topic cards, label key, sticky momentum filter, *New scan* panel (region, look-back, category), previous scans | run, history, settings | `loadPageData`, `POST /api/radar/run` | — | `revealOnScroll` on clusters | filter state (`useState`) |
 | `TrendCluster` | Rank, name, summary, score, momentum, metrics; expandable intelligence panel | `TrendCluster` | — | name, summary, whyNow, audienceSignals, narrative | GSAP height + stagger on expand | `open` (`aria-expanded`) |
 | `TrendMetrics` / `MomentumBadge` | Score, creators, videos, avg views, avg duration, engagement | `metrics` (CALCULATED) | — | — | — | none |
 | `CreatorCoverage` | Real channel names with video count and views, linking to the channels | `creators` (OBSERVED) | — | — | — | none |
@@ -169,6 +170,7 @@ flowchart LR
 |---|---|---|
 | `layout/AppShell` | Skip link, TopNav, main, footer, `RadarProvider`, `LoadingRadar` | — |
 | `layout/TopNav` | 01 Radar · 02 Trends · 03 Brief · Settings (`aria-current`) | pathname |
+| `layout/ThemeToggle` | Light / dark switch, saved in localStorage; `lib/theme.ts` script applies it before paint | theme |
 | `layout/PageTransition` | Route enter animation (`app/template.tsx`) | — |
 | `shared/RadarProvider` | Global run state; reads the NDJSON stream; `useCurrentRun` | stage, warnings, error, session run |
 | `shared/LoadingRadar` | Full-screen scan dialog showing the server's real stages, elapsed time, warnings, errors (Esc closes) | reads context |

@@ -25,11 +25,11 @@ export function WhyNowSection({ cluster, videos }: { cluster: TrendCluster; vide
   const m = cluster.metrics;
   const top = [...videos].sort((a, b) => (b.views ?? 0) - (a.views ?? 0))[0];
   const evidence: { label: string; value: string; sub: string; kind: "observed" | "calculated" }[] = [
-    { label: "Creators", value: String(m.creatorCount), sub: "distinct channels in the cluster", kind: "calculated" },
+    { label: "Creators", value: String(m.creatorCount), sub: "different channels", kind: "calculated" },
     { label: "Videos", value: String(m.videoCount), sub: `in the last ${cluster.momentumSeries.length} days`, kind: "calculated" },
     { label: "Recent uploads", value: String(m.recentUploads), sub: "published in the last 72 hours", kind: "calculated" },
-    { label: "Engagement", value: pct(m.avgEngagementRate, 1), sub: "mean (likes + comments) / views", kind: "calculated" },
-    { label: "Momentum", value: cluster.momentum === "BUILDING BASELINE" ? "Baseline" : cluster.momentum, sub: cluster.momentumBasis === "coverage+snapshots" ? "uploads + stored snapshots" : "from upload timing", kind: "calculated" },
+    { label: "Engagement", value: pct(m.avgEngagementRate, 1), sub: "likes + comments per view", kind: "calculated" },
+    { label: "Momentum", value: cluster.momentum === "BUILDING BASELINE" ? "Baseline" : cluster.momentum, sub: cluster.momentumBasis === "coverage+snapshots" ? "uploads + view growth" : "based on upload timing", kind: "calculated" },
     { label: "Newest upload", value: ago(m.newestUploadAt), sub: top ? `top video: ${compact(top.views)} views` : "", kind: "observed" },
   ];
   return (

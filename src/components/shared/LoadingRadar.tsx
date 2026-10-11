@@ -115,7 +115,7 @@ export function LoadingRadar() {
             })}
           </ol>
           {running && detail && <p className="micro text-fg-3">{detail}</p>}
-          {running && <p className="text-xs text-fg-3">A full scan reads live YouTube data and asks Gemini Flash for the clusters. It usually takes 30–90 seconds.</p>}
+          {running && <p className="text-xs text-fg-3">Usually takes under a minute.</p>}
           {warnings.map((w) => (
             <p key={w} className="text-sm text-fg-2">
               <span className="micro mr-2 text-cool">Note</span>

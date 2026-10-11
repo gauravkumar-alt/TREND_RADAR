@@ -27,16 +27,17 @@ Every insight carries exactly one label: **OBSERVED** (from the YouTube API), **
 ## Product walkthrough
 
 1. **`/radar`: Live Radar.** A cinematic scroll story built with GSAP ScrollTrigger:
-   - Hero with live scan stats and a radar plot of real videos (angle = cluster, distance = age, size = views/hour).
+   - Hero with live scan stats and a radar plot of real videos (angle = cluster, distance = age, size = views/hour). This week's 3–4 topics orbit the radar as keyword + trend-score chips; the orbit pauses on hover/focus, and each chip opens that topic on `/trends`.
    - A pinned statement: *"The internet doesn't trend one video at a time."* turns into *"It trends in conversations."*
    - **ScrollVideoReel**: five real videos rotate as you scroll (pin + scrub + snap, clip-path reveals). Each one links to `youtube.com/watch?v=…`.
    - *"But the video isn't the story. The pattern is."*
    - **TrendFormation**: the top cluster's thumbnails converge into the topic name, and then its calculated stats count up.
    - **Momentum**: the uploads-per-day line draws itself, then the verdict appears: RISING / STABLE / COOLING / BUILDING BASELINE.
    - **Why Now**, then **"So what should Ishaan make?"**
-2. **`/trends`: Trend Intelligence.** The analytical page. It has filters (category, region, lookback, momentum) and a *Run new radar* button. Each cluster can be expanded to show why now, creator coverage, format breakdown, audience signals, momentum, score anatomy, evidence videos and the recommendation. Previous scans can be reopened from the history list.
+2. **`/trends`: Trend Intelligence.** Opens with an at-a-glance row of every topic (keyword, score, momentum) and a one-line key to the four labels. Each topic shows its key numbers and *what to make* straight away; *Show details* reveals why now, what viewers care about, the full recommendation, example videos, who's covering it, formats that work, momentum and how the score is built. Filter by momentum, or open *New scan* to rescan with another region, look-back or category. Previous scans can be reopened.
 3. **`/brief`: Sunday Brief.** An editorial report with *The One To Watch*, the 3–5 opportunities, and a *Monday Morning* filming plan (film this, format, angle, title, why). If Resend is configured, the brief can also be emailed.
-4. **`/settings`.** Categories (presets plus custom keyword categories), region, language, lookback window, videos per category, and email. Settings are stored in Supabase.
+4. **Light / dark mode.** A toggle in the nav switches themes; the choice is remembered and applied before first paint.
+5. **`/settings`.** Categories (presets plus custom keyword categories), region, language, lookback window, videos per category, and email. Settings are stored in Supabase.
 
 ## Architecture
 

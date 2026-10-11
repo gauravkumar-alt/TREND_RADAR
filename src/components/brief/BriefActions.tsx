@@ -28,7 +28,7 @@ export function GenerateBriefButton({ runId, label = "Generate brief" }: { runId
         size="sm"
       >
         <RefreshCw className={busy ? "animate-spin" : ""} aria-hidden />
-        {busy ? "Writing with Gemini Flash…" : label}
+        {busy ? "Writing…" : label}
       </Button>
       {error && <ErrorState compact title="Brief failed" message={error} />}
     </div>
@@ -47,7 +47,7 @@ export function SendBriefButton({
   lastDelivery: { at: string; status: string; recipient: string } | null;
 }) {
   const [state, setState] = useState<{ busy: boolean; msg: string | null; ok: boolean }>({ busy: false, msg: null, ok: false });
-  if (!emailConfigured) return <p className="micro text-fg-3">Email delivery is off (no RESEND_API_KEY). The brief lives here.</p>;
+  if (!emailConfigured) return <p className="micro text-fg-3">Email isn&apos;t set up.</p>;
   if (!recipient) return <p className="micro text-fg-3">Add an email address in Settings to send this brief.</p>;
   return (
     <div className="flex flex-col gap-2">

@@ -20,7 +20,7 @@ const ANALYST_SYSTEM = `You are the trend analyst for TREND//RADAR, a YouTube co
 You receive a table of real, recent YouTube videos with metrics the application has already calculated.
 Rules:
 - Group videos into topic clusters: specific conversations several creators are having now (e.g. "Claude Code vs Cursor for beginners"), never broad buckets like "AI" or "Tech".
-- keyword: a 1–3 word label for the cluster (max 20 characters), the words a viewer would recognise, e.g. "Claude Code", "vivo V80", "AI agents".
+- keyword: a 1–3 word label for the cluster (max 20 characters), the words a viewer would recognise, e.g. "Claude Code", "vivo V80", "AI agents". No abbreviations or acronyms a general viewer might not know.
 - Only use the video refs given (v1, v2, …). Each video belongs to at most one cluster; leave unrelated videos out.
 - A cluster needs at least 3 videos from at least 2 different channels when possible (never fewer than 2 videos from 2 channels).
 - Never invent or restate numbers that are not in the table. Do not compute your own totals, percentages or growth rates: the app does that. Refer to evidence qualitatively ("several channels uploaded within days of each other").
@@ -94,7 +94,7 @@ export async function analyzeClusters(
 // ---- Sunday brief ------------------------------------------------------------
 const EDITOR_SYSTEM = `You are the editor of the TREND//RADAR Sunday Brief, a weekly strategy memo for one Indian tech YouTuber.
 Tone: calm, specific, confident, editorial. Short sentences. Address the creator as "you".
-Every number you mention must appear verbatim in the data provided. Never invent statistics, growth rates or history.
+Refer to topics by their names, never by ids like "c1" or "cluster c2". Every number you mention must appear verbatim in the data provided. Never invent statistics, growth rates or history.
 If momentum is "BUILDING BASELINE", say the direction is not yet measurable rather than guessing.
 Pick the single best opportunity for Monday's filming session, considering score, momentum, confidence and fit with an AI tools / productivity / tech reviews channel.`;
 
@@ -111,6 +111,21 @@ export function describeClusterForBrief(c: TrendCluster): string {
     `  audience: ${c.ai.audienceSignals.join("; ")}`,
     `  analyst recommendation: ${c.ai.recommendation.angle} — "${c.ai.recommendation.possibleTitle}" (${c.ai.recommendation.format})`,
   ].join("\n");
+}
+
+/** Replace any leaked internal ids ("cluster c2", "[c2]", "c2") in brief copy with the topic name. */
+export function scrubClusterIds<T>(value: T, names: Record<string, string>): T {
+  const fix = (t: string) =>
+    t
+      .replace(/\[?\b(?:the\s+)?cluster\s+(c\d+)\b\]?/gi, (m, id: string) => names[id.toLowerCase()] ?? m)
+      .replace(/\[(c\d+)\]|\b(c\d+)\b(?=[\s,.;:)])/g, (m, a?: string, b?: string) => names[(a ?? b ?? "").toLowerCase()] ?? m);
+  const walk = (v: unknown, key?: string): unknown => {
+    if (typeof v === "string") return key === "clusterId" ? v : fix(v);
+    if (Array.isArray(v)) return v.map((x) => walk(x));
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, walk(x, k)]));
+    return v;
+  };
+  return walk(value) as T;
 }
 
 export async function writeBrief(
@@ -136,6 +151,7 @@ export async function writeBrief(
       temperature: 0.6,
     });
     const v = validateBrief(parseJsonLoose(text), ids);
-    return v.ok ? { ok: true, value: v.brief } : v;
+    const names = Object.fromEntries(clusters.map((c) => [c.id, c.ai.name]));
+    return v.ok ? { ok: true, value: scrubClusterIds(v.brief, names) } : v;
   });
 }
