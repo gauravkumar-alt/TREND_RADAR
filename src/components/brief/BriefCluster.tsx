@@ -10,7 +10,7 @@ export function BriefCluster({ cluster, run, index, whyNow, recommendation }: { 
   return (
     <article className="grid gap-8 border-t border-line py-14 md:grid-cols-[160px_1fr] md:py-20" aria-labelledby={`brief-${cluster.id}`}>
       <div data-reveal className="flex items-start gap-4 md:flex-col">
-        <span className="display-xl tabular text-7xl text-signal md:text-9xl">{String(index + 1).padStart(2, "0")}</span>
+        <span data-parallax className="display-xl tabular block text-7xl text-signal md:text-9xl">{String(index + 1).padStart(2, "0")}</span>
       </div>
       <div className="flex flex-col gap-8">
         <div data-reveal className="flex flex-col gap-4">
@@ -20,7 +20,7 @@ export function BriefCluster({ cluster, run, index, whyNow, recommendation }: { 
               Score {cluster.score} · {cluster.metrics.creatorCount} creators · {cluster.metrics.videoCount} videos · avg {formatDurationWords(cluster.metrics.avgDurationSeconds)}
             </span>
           </div>
-          <h3 id={`brief-${cluster.id}`} className="font-display text-4xl font-bold leading-[1.02] tracking-tight md:text-6xl">
+          <h3 id={`brief-${cluster.id}`} data-rise className="font-display text-4xl font-bold leading-[1.02] tracking-tight md:text-6xl">
             {cluster.ai.name}
           </h3>
         </div>

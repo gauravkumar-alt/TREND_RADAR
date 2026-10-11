@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { gsap, useGSAP } from "@/lib/animations/gsap";
-import { prefersReducedMotion } from "@/lib/animations/motion";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/animations/gsap";
+import { MEDIA, prefersReducedMotion } from "@/lib/animations/motion";
+import { PLAY_ONCE, detailsOpen, growBars, topicScene } from "@/lib/animations/presets";
+import { ScoreGauge } from "./ScoreGauge";
 import { Provenance } from "@/components/shared/Provenance";
 import { cn } from "@/lib/utils";
 import { MomentumBadge, TrendMetrics, momentumExplainer } from "./TrendMetrics";
@@ -30,20 +32,35 @@ export function TrendCluster({ cluster, run, defaultOpen = false }: { cluster: C
     setOpen(defaultOpen);
   }, [defaultOpen]);
   const panel = useRef<HTMLDivElement>(null);
+  const article = useRef<HTMLElement>(null);
   const first = useRef(true);
 
+  // Entry scene: rank drift, title rise, ring draw, numbers count. An open-on-load panel animates when reached.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(`${MEDIA.desktop}, ${MEDIA.mobile}`, () => {
+        if (!article.current) return;
+        topicScene(article.current);
+        if (panel.current && !panel.current.hidden) {
+          ScrollTrigger.create({ trigger: panel.current, start: "top 85%", toggleActions: PLAY_ONCE, animation: growBars(panel.current, 1.1) });
+        }
+      });
+      return () => mm.revert();
+    },
+    { scope: article },
+  );
+
+  // Opening the panel later: blocks stagger, bars grow, chart draws, thumbnails wipe in.
   useGSAP(
     () => {
       if (!panel.current) return;
       if (first.current) {
         first.current = false;
-        return; // initial state comes from markup; no animation on load
+        return;
       }
-      if (prefersReducedMotion()) return;
-      if (open) {
-        gsap.fromTo(panel.current, { height: 0, opacity: 0 }, { height: "auto", opacity: 1, duration: 0.6, ease: "power3.out", clearProps: "height" });
-        gsap.from(panel.current.querySelectorAll("[data-detail]"), { y: 24, opacity: 0, duration: 0.6, stagger: 0.06, ease: "power3.out", delay: 0.1 });
-      }
+      if (prefersReducedMotion() || !open) return;
+      detailsOpen(panel.current);
     },
     { dependencies: [open] },
   );
@@ -52,17 +69,20 @@ export function TrendCluster({ cluster, run, defaultOpen = false }: { cluster: C
   const panelId = `${cluster.id}-detail`;
 
   return (
-    <article id={cluster.id} className="scroll-mt-44 border-t border-line-2 py-10 md:py-14" aria-labelledby={`${cluster.id}-title`}>
-      <div className="grid gap-6 md:grid-cols-[120px_1fr] md:gap-10">
-        <div className="flex items-start gap-4 md:flex-col">
-          <span className="display-xl tabular text-6xl text-fg-3 md:text-8xl">{String(cluster.rank).padStart(2, "0")}</span>
-          <div className="flex flex-col gap-2">
-            <span className="micro text-fg-3">Score</span>
-            <span className="tabular text-4xl font-bold text-signal">{cluster.score}</span>
-          </div>
+    <article ref={article} id={cluster.id} className="scroll-mt-44 border-t border-line-2 py-10 md:py-14" aria-labelledby={`${cluster.id}-title`}>
+      <div data-topic-head className="grid gap-6 md:grid-cols-[140px_1fr] md:gap-10">
+        <div className="flex items-center gap-5 md:flex-col md:items-start">
+          <span data-rank-drift className="block">
+            <span className="block overflow-hidden">
+              <span data-rank className="display-xl tabular block text-6xl text-fg-3 md:text-[128px]">
+                {String(cluster.rank).padStart(2, "0")}
+              </span>
+            </span>
+          </span>
+          <ScoreGauge score={cluster.score} size={104} />
         </div>
         <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center gap-2">
+          <div data-topic-badge className="flex flex-wrap items-center gap-2">
             <MomentumBadge momentum={cluster.momentum} />
             <span className="micro border border-line-2 px-2 py-1 text-fg-2">Confidence · {cluster.confidence}</span>
             {cluster.categories.map((c) => (
@@ -71,16 +91,17 @@ export function TrendCluster({ cluster, run, defaultOpen = false }: { cluster: C
               </span>
             ))}
           </div>
-          <h3 id={`${cluster.id}-title`} className="display-xl text-[clamp(36px,5vw,84px)]">
+          <h3 data-topic-title id={`${cluster.id}-title`} className="display-xl text-[clamp(36px,5vw,84px)]">
             {cluster.ai.name}
           </h3>
-          <div className="flex max-w-4xl flex-col gap-2">
+          <div data-topic-summary className="flex max-w-4xl flex-col gap-2">
             <Provenance kind="ai" className="self-start" />
             <p className="font-serif text-xl leading-snug text-fg-2 md:text-2xl">{cluster.ai.summary}</p>
           </div>
           <TrendMetrics cluster={cluster} />
           <button
             type="button"
+            data-topic-toggle
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-controls={panelId}
@@ -93,7 +114,7 @@ export function TrendCluster({ cluster, run, defaultOpen = false }: { cluster: C
       </div>
 
       <div ref={panel} id={panelId} hidden={!open} className="overflow-hidden">
-        <div className="mt-10 grid gap-12 md:pl-[160px]">
+        <div className="mt-10 grid gap-12 md:pl-[180px]">
           <div data-detail className="grid gap-10 lg:grid-cols-[1.3fr_1fr]">
             <Block title="Why now">
               <Provenance kind="ai" className="self-start" />

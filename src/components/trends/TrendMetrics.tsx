@@ -37,13 +37,14 @@ export function momentumExplainer(c: TrendCluster): string {
 /** Compact row of the calculated metrics for a cluster. */
 export function TrendMetrics({ cluster, className }: { cluster: TrendCluster; className?: string }) {
   const m = cluster.metrics;
-  const items: [string, string][] = [
-    ["Trend score", String(cluster.score)],
-    ["Creators", String(m.creatorCount)],
-    ["Videos", String(m.videoCount)],
-    ["Avg views", compact(m.avgViews)],
-    ["Avg duration", formatDurationWords(m.avgDurationSeconds)],
-    ["Engagement", pct(m.avgEngagementRate, 1)],
+  // [label, text, raw value for the count-up, count format]
+  const items: [string, string, number | null, string][] = [
+    ["Trend score", String(cluster.score), cluster.score, "int"],
+    ["Creators", String(m.creatorCount), m.creatorCount, "int"],
+    ["Videos", String(m.videoCount), m.videoCount, "int"],
+    ["Avg views", compact(m.avgViews), m.avgViews, "compact"],
+    ["Avg duration", formatDurationWords(m.avgDurationSeconds), m.avgDurationSeconds, "duration"],
+    ["Engagement", pct(m.avgEngagementRate, 1), m.avgEngagementRate, "pct1"],
   ];
   return (
     <div className={cn("flex flex-col gap-3", className)}>
@@ -52,10 +53,12 @@ export function TrendMetrics({ cluster, className }: { cluster: TrendCluster; cl
         <span className="micro text-fg-3">from {m.videoCount} live videos</span>
       </div>
       <dl className="grid grid-cols-3 gap-px border border-line bg-line md:grid-cols-6">
-        {items.map(([k, v]) => (
-          <div key={k} className="flex flex-col gap-1 bg-bg p-3 md:p-4">
+        {items.map(([k, v, raw, fmt]) => (
+          <div key={k} data-topic-metric className="flex flex-col gap-1 bg-bg p-3 md:p-4">
             <dt className="micro text-fg-3">{k}</dt>
-            <dd className={cn("tabular text-xl font-bold md:text-2xl", k === "Trend score" && "text-signal")}>{v}</dd>
+            <dd {...(raw != null ? { "data-count": raw, "data-fmt": fmt } : {})} className={cn("tabular text-xl font-bold md:text-2xl", k === "Trend score" && "text-signal")}>
+              {v}
+            </dd>
           </div>
         ))}
       </dl>

@@ -1,8 +1,8 @@
 "use client";
 import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/animations/gsap";
+import { gsap, scheduleRefresh, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { revealOnScroll } from "@/lib/animations/presets";
+import { briefIntro, mondayScene, parallaxNumbers, revealEach, revealOnScroll, riseOnScroll } from "@/lib/animations/presets";
 import { ago, istDateTime } from "@/lib/format";
 import { useRadar } from "@/components/shared/RadarProvider";
 import { BriefHero } from "./BriefHero";
@@ -26,9 +26,27 @@ export function BriefExperience({ brief, run, emailConfigured, recipient, lastDe
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(`${MEDIA.desktop}, ${MEDIA.mobile}`, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-reveal]"), { y: 28, stagger: 0.06 });
-      });
+      const build = (desktop: boolean) => {
+        const root = ref.current;
+        if (!root) return;
+        const mast = root.querySelector<HTMLElement>("[data-brief-mast]");
+        if (mast) briefIntro(mast);
+        riseOnScroll(root);
+        revealOnScroll(root.querySelectorAll("[data-reveal]"), { y: 28, stagger: 0.06 });
+        if (desktop) {
+          parallaxNumbers(root);
+          const monday = root.querySelector<HTMLElement>("[data-monday]");
+          // Pin only when the whole plan fits on screen; otherwise let it scroll with simple reveals.
+          if (monday && monday.offsetHeight <= window.innerHeight) mondayScene(monday);
+          else revealEach(root.querySelectorAll("[data-monday-row], [data-monday-foot]"));
+        } else {
+          revealEach(root.querySelectorAll("[data-monday-row], [data-monday-foot]"));
+        }
+        // Scenes are built after the page's load event; measure them once layout has settled.
+        scheduleRefresh(300);
+      };
+      mm.add(MEDIA.desktop, () => build(true));
+      mm.add(MEDIA.mobile, () => build(false));
       return () => mm.revert();
     },
     { scope: ref },

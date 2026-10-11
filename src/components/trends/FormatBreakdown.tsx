@@ -20,7 +20,7 @@ export function FormatBreakdown({ formats }: { formats: FormatShare[] }) {
           <li key={f.format} className="grid grid-cols-[110px_1fr_auto] items-center gap-3 md:grid-cols-[140px_1fr_140px]">
             <span className="text-sm font-medium">{f.format}</span>
             <span className="relative h-2 bg-bg-3" aria-hidden>
-              <span className="absolute inset-y-0 left-0 bg-signal" style={{ width: `${Math.max(4, f.share * 100)}%` }} />
+              <span data-bar className="absolute inset-y-0 left-0 bg-signal" style={{ width: `${Math.max(4, f.share * 100)}%` }} />
             </span>
             <span className="micro tabular text-right text-fg-2">
               {showPct ? `${Math.round(f.share * 100)}%` : `${f.count} video${f.count > 1 ? "s" : ""}`}

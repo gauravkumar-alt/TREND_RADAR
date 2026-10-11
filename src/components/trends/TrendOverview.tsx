@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { gsap, useGSAP } from "@/lib/animations/gsap";
+import { gsap, scheduleRefresh, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { revealOnScroll } from "@/lib/animations/presets";
+import { topicRail, trendsIntro } from "@/lib/animations/presets";
+import { clusterKeyword } from "@/lib/trends/keyword";
 import { CATEGORY_PRESETS, LOOKBACK_OPTIONS, REGIONS, regionLabel } from "@/lib/config";
 import { ago, istDateTime } from "@/lib/format";
 import { useCurrentRun } from "@/components/shared/RadarProvider";
@@ -39,6 +40,8 @@ export function TrendOverview({ serverRun, pinnedRunId, failure, history, settin
   const [momentum, setMomentum] = useState<MomentumFilter>("ALL");
   const [hash, setHash] = useState<string | null>(null);
   const list = useRef<HTMLDivElement>(null);
+  const header = useRef<HTMLElement>(null);
+  const rail = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const read = () => {
@@ -75,15 +78,26 @@ export function TrendOverview({ serverRun, pinnedRunId, failure, history, settin
     });
   }, [run, momentum, category, allCategories]);
 
+  // Header letters rise on load.
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add(`${MEDIA.desktop}, ${MEDIA.mobile}`, () => {
+      if (header.current) trendsIntro(header.current);
+    });
+    return () => mm.revert();
+  });
+
+  // Desktop side rail tracks which topic you're reading.
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(`${MEDIA.desktop}, ${MEDIA.mobile}`, () => {
-        if (list.current) revealOnScroll(list.current.querySelectorAll(":scope > article"), { y: 48 });
+      mm.add(MEDIA.desktop, () => {
+        if (rail.current && list.current) topicRail(rail.current, [...list.current.querySelectorAll<HTMLElement>(":scope > article")]);
       });
+      scheduleRefresh(300);
       return () => mm.revert();
     },
-    { scope: list, dependencies: [run?.id, clusters.length] },
+    { dependencies: [run?.id, clusters.length] },
   );
 
   const categoryIsInRun = category === "ALL" || runCategoryLabels.includes(allCategories.find((c) => c.id === category)?.label ?? "");
@@ -95,13 +109,28 @@ export function TrendOverview({ serverRun, pinnedRunId, failure, history, settin
   };
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 md:px-8">
-      <header className="flex flex-col gap-6 border-b border-line py-14 md:py-20">
-        <span className="micro text-signal">02 · Analysis</span>
-        <h1 className="display-xl text-[clamp(52px,10vw,180px)]">TREND INTELLIGENCE</h1>
-        <p className="max-w-2xl font-serif text-2xl italic text-fg-2 md:text-3xl">Three to five conversations worth paying attention to.</p>
+    <div className="mx-auto max-w-[1600px] px-4 md:px-8 2xl:pl-28">
+      {clusters.length > 1 && (
+        <nav ref={rail} aria-label="Jump to topic" className="fixed left-5 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-3 2xl:flex">
+          {clusters.map((c) => (
+            <a key={c.id} href={`#${c.id}`} data-rail={c.id} className="group flex items-center gap-3">
+              <span className="relative h-12 w-px overflow-hidden bg-line-2" aria-hidden>
+                <span data-rail-fill className="absolute inset-0 origin-top scale-y-0 bg-signal" />
+              </span>
+              <span className="micro tabular text-fg-3 transition-colors group-hover:text-fg group-data-[active]:text-signal">{String(c.rank).padStart(2, "0")}</span>
+              <span className="micro max-w-0 overflow-hidden whitespace-nowrap text-fg opacity-0 transition-all duration-300 group-hover:max-w-40 group-hover:opacity-100 group-data-[active]:max-w-40 group-data-[active]:opacity-100">
+                {clusterKeyword(c)}
+              </span>
+            </a>
+          ))}
+        </nav>
+      )}
+      <header ref={header} className="flex flex-col gap-6 border-b border-line py-14 md:py-20">
+        <span data-intro-kicker className="micro text-signal">02 · Analysis</span>
+        <h1 data-intro-title className="display-xl text-[clamp(52px,10vw,180px)]">TREND INTELLIGENCE</h1>
+        <p data-intro-sub className="max-w-2xl font-serif text-2xl italic text-fg-2 md:text-3xl">Three to five conversations worth paying attention to.</p>
         {run && (
-          <p className="micro flex flex-wrap gap-x-4 gap-y-1 text-fg-3">
+          <p data-intro-fade className="micro flex flex-wrap gap-x-4 gap-y-1 text-fg-3">
             <span>{pinnedRunId ? "Archived scan" : failure ? "Last successful scan" : "Latest scan"} · {istDateTime(run.completedAt)} IST ({ago(run.completedAt)})</span>
             <span>{regionLabel(run.settings.regionCode)}</span>
             <span>{run.settings.lookbackDays}-day lookback</span>

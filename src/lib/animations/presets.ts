@@ -11,6 +11,13 @@
 import { gsap, ScrollTrigger } from "./gsap";
 import { EASE } from "./motion";
 
+/**
+ * Play on first entry and never reverse. Used instead of `once: true`, which
+ * kills the trigger while ScrollTrigger may still be iterating its list
+ * (crashes when an element is already in view at creation time).
+ */
+export const PLAY_ONCE = "play none none none";
+
 const q = <T extends Element = HTMLElement>(root: Element, sel: string) => gsap.utils.toArray<T>(root.querySelectorAll(sel));
 
 // ---------------------------------------------------------------------------
@@ -181,7 +188,6 @@ export function revealOnScroll(targets: Element[] | NodeListOf<Element>, opts: {
   gsap.set(els, { opacity: 0, y: opts.y ?? 32 });
   ScrollTrigger.batch(els, {
     start: "top 88%",
-    once: true,
     onEnter: (batch) => gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, stagger: opts.stagger ?? 0.08, ease: EASE.out, overwrite: true }),
   });
 }
@@ -202,7 +208,169 @@ export function countUp(el: Element, to: number, format: (n: number) => string, 
   });
 }
 
-/** Page enter: soft clip + fade. Used by PageTransition. */
+/**
+ * Page enter: opacity only. A transform on this wrapper would become the
+ * containing block for every pinned (position: fixed) scene inside the page.
+ */
 export function pageEnter(el: HTMLElement) {
-  return gsap.fromTo(el, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6, ease: EASE.out, clearProps: "transform" });
+  return gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: EASE.out, clearProps: "opacity" });
+}
+
+// ===========================================================================
+// Editorial scenes for /trends and /brief
+// ===========================================================================
+import { SplitText, scheduleRefresh } from "./gsap";
+import { compact as fmtCompact } from "@/lib/format";
+import { formatDurationWords } from "@/lib/youtube/duration";
+
+/** Formats used by [data-count] elements; the final text is always the real value. */
+const COUNT_FORMATS: Record<string, (n: number) => string> = {
+  int: (n) => String(Math.round(n)),
+  compact: (n) => fmtCompact(n),
+  pct1: (n) => `${(n * 100).toFixed(1)}%`,
+  duration: (n) => formatDurationWords(Math.round(n)),
+};
+
+/** Words (or chars) rise out of a mask. */
+export function splitRise(el: Element | null, opts: { type?: "words" | "chars"; stagger?: number; duration?: number } = {}) {
+  const tl = gsap.timeline();
+  if (!el) return tl;
+  const chars = opts.type === "chars";
+  const split = SplitText.create(el, { type: chars ? "words,chars" : "words", mask: chars ? "chars" : "words" });
+  tl.from(chars ? split.chars : split.words, { yPercent: 115, duration: opts.duration ?? 0.9, stagger: opts.stagger ?? (chars ? 0.025 : 0.05), ease: EASE.expo });
+  // Masks clip descenders on tight display type; once the words have landed, restore the plain text.
+  tl.eventCallback("onComplete", () => {
+    split.revert();
+    scheduleRefresh();
+  });
+  return tl;
+}
+
+/** Count every [data-count] inside `root` from 0 to its real value. */
+export function countIn(root: Element, duration = 1.2) {
+  const tl = gsap.timeline();
+  root.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
+    const to = Number(el.dataset.count);
+    const fmt = COUNT_FORMATS[el.dataset.fmt ?? "int"] ?? COUNT_FORMATS.int;
+    if (Number.isFinite(to)) tl.add(countUp(el, to, fmt, duration), 0);
+  });
+  return tl;
+}
+
+/** Grow [data-bar] fills from zero, draw [data-gauge] arcs and momentum lines. */
+export function growBars(root: Element, duration = 1) {
+  const tl = gsap.timeline();
+  const bars = root.querySelectorAll("[data-bar]");
+  if (bars.length) tl.from(bars, { scaleX: 0, transformOrigin: "0% 50%", duration, stagger: 0.06, ease: EASE.expo }, 0);
+  const arcs = root.querySelectorAll("[data-gauge]");
+  if (arcs.length) tl.from(arcs, { drawSVG: "0%", duration: duration * 1.3, ease: EASE.expo }, 0);
+  const lines = root.querySelectorAll("[data-momentum-line]");
+  if (lines.length) tl.from(lines, { drawSVG: "0%", duration: duration * 1.6, ease: EASE.inOut }, 0.1);
+  return tl;
+}
+
+/** /trends header: title letters rise, the rest settles in. */
+export function trendsIntro(root: HTMLElement) {
+  const tl = gsap.timeline({ defaults: { ease: EASE.expo } });
+  tl.from(root.querySelectorAll("[data-intro-kicker]"), { y: 12, opacity: 0, duration: 0.6 })
+    .add(splitRise(root.querySelector("[data-intro-title]"), { type: "chars", stagger: 0.03, duration: 1.1 }), "<0.1")
+    .add(splitRise(root.querySelector("[data-intro-sub]"), { stagger: 0.04 }), "-=0.7")
+    .from(root.querySelectorAll("[data-intro-fade]"), { y: 14, opacity: 0, duration: 0.7, stagger: 0.04 }, "-=0.5");
+  return tl;
+}
+
+/**
+ * One topic: the giant rank drifts against the scroll; on first entry the
+ * title rises word by word, numbers count up, the score ring draws and the
+ * "what to make" line wipes in.
+ */
+export function topicScene(article: HTMLElement) {
+  const drift = article.querySelector("[data-rank-drift]");
+  if (drift) {
+    gsap.fromTo(drift, { yPercent: 20 }, { yPercent: -20, ease: EASE.none, scrollTrigger: { trigger: article, start: "top bottom", end: "bottom top", scrub: true } });
+  }
+  const head = article.querySelector("[data-topic-head]") ?? article;
+  const tl = gsap.timeline({ scrollTrigger: { trigger: article, start: "top 80%", toggleActions: PLAY_ONCE }, defaults: { ease: EASE.expo } });
+  tl.from(article.querySelector("[data-rank]"), { yPercent: 100, opacity: 0, duration: 1 })
+    .add(growBars(head, 1.3), "<")
+    .add(countIn(head, 1.3), "<")
+    .from(article.querySelectorAll("[data-topic-badge]"), { y: 10, opacity: 0, duration: 0.5, stagger: 0.05 }, "<0.1")
+    .add(splitRise(article.querySelector("[data-topic-title]"), { stagger: 0.045 }), "<0.05")
+    .from(article.querySelector("[data-topic-summary]"), { y: 24, opacity: 0, duration: 0.8 }, "<0.3")
+    .from(article.querySelectorAll("[data-topic-metric]"), { y: 20, opacity: 0, duration: 0.6, stagger: 0.05 }, "<0.1")
+    .from(article.querySelector("[data-topic-toggle]"), { opacity: 0, y: 10, duration: 0.5 }, "-=0.3");
+  return tl;
+}
+
+/** Details panel opening: blocks stagger up, bars grow, chart draws, thumbnails wipe in. */
+export function detailsOpen(panel: HTMLElement) {
+  const tl = gsap.timeline({ defaults: { ease: EASE.out } });
+  tl.fromTo(panel, { height: 0, opacity: 0 }, { height: "auto", opacity: 1, duration: 0.55, clearProps: "height" })
+    .from(panel.querySelectorAll("[data-detail]"), { y: 30, opacity: 0, duration: 0.6, stagger: 0.07 }, "<0.1")
+    .add(growBars(panel, 1), "<0.2")
+    .from(panel.querySelectorAll("[data-evidence]"), { clipPath: "inset(0 0 100% 0)", duration: 0.8, stagger: 0.08, ease: EASE.inOut }, "<0.1");
+  return tl;
+}
+
+/** Side rail: highlight the topic in view and fill its line as you read through it. */
+export function topicRail(rail: HTMLElement, articles: HTMLElement[]) {
+  articles.forEach((a) => {
+    const item = rail.querySelector<HTMLElement>(`[data-rail="${a.id}"]`);
+    if (!item) return;
+    const fill = item.querySelector("[data-rail-fill]");
+    ScrollTrigger.create({
+      trigger: a,
+      start: "top 55%",
+      end: "bottom 55%",
+      onToggle: (self) => item.toggleAttribute("data-active", self.isActive),
+      onUpdate: (self) => {
+        if (fill) gsap.set(fill, { scaleY: self.progress });
+      },
+    });
+  });
+  gsap.from(rail.children, { x: -24, opacity: 0, duration: 0.6, stagger: 0.07, ease: EASE.out, delay: 0.8 });
+}
+
+/** Sunday Brief masthead. */
+export function briefIntro(root: HTMLElement) {
+  const tl = gsap.timeline({ defaults: { ease: EASE.expo } });
+  tl.from(root.querySelectorAll("[data-mast-rule]"), { scaleX: 0, transformOrigin: "0% 50%", duration: 1, stagger: 0.1 })
+    .add(splitRise(root.querySelector("[data-mast-title]"), { type: "chars", stagger: 0.035, duration: 1.1 }), "<0.1")
+    .from(root.querySelectorAll("[data-mast-fade]"), { y: 16, opacity: 0, duration: 0.7, stagger: 0.07 }, "-=0.7")
+    .add(countIn(root, 1.2), "<")
+    .add(splitRise(root.querySelector("[data-mast-headline]"), { stagger: 0.04 }), "-=0.6");
+  return tl;
+}
+
+/** Big numbers that drift against the scroll. */
+export function parallaxNumbers(root: Element, selector = "[data-parallax]") {
+  root.querySelectorAll(selector).forEach((el) => {
+    gsap.fromTo(el, { yPercent: 30 }, { yPercent: -30, ease: EASE.none, scrollTrigger: { trigger: el.closest("article,section") ?? el, start: "top bottom", end: "bottom top", scrub: true } });
+  });
+}
+
+/** Headings that rise word by word when scrolled into view. */
+export function riseOnScroll(root: Element, selector = "[data-rise]") {
+  root.querySelectorAll(selector).forEach((el) => {
+    ScrollTrigger.create({ trigger: el, start: "top 85%", toggleActions: PLAY_ONCE, animation: splitRise(el, { stagger: 0.04 }) });
+  });
+}
+
+/** MONDAY MORNING finale: pinned; the title grows into place and each line of the plan lands in turn. */
+export function mondayScene(section: HTMLElement) {
+  const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: "top top", end: "+=160%", pin: true, scrub: 0.6 } });
+  tl.from(section.querySelector("[data-monday-title]"), { scale: 0.5, opacity: 0.15, transformOrigin: "0% 50%", duration: 1 })
+    .from(section.querySelector("[data-monday-rule]"), { scaleX: 0, transformOrigin: "0% 50%", duration: 0.6 }, "-=0.3");
+  section.querySelectorAll("[data-monday-row]").forEach((row) => {
+    tl.from(row, { y: 40, opacity: 0, duration: 0.5 }).from(row.querySelector("dd"), { clipPath: "inset(0 100% 0 0)", duration: 0.6 }, "<0.1");
+  });
+  tl.from(section.querySelectorAll("[data-monday-foot]"), { opacity: 0, duration: 0.4 });
+  return tl;
+}
+
+/** Simple per-element scroll reveal (one trigger each); safe to call alongside revealOnScroll. */
+export function revealEach(targets: Iterable<Element>, y = 24) {
+  for (const el of targets) {
+    gsap.from(el, { y, opacity: 0, duration: 0.7, ease: EASE.out, scrollTrigger: { trigger: el, start: "top 90%", toggleActions: PLAY_ONCE } });
+  }
 }

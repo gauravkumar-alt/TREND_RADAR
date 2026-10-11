@@ -13,7 +13,7 @@ export function TopOpportunity({ brief, run }: { brief: Brief; run: RadarRun }) 
       <div className="mx-auto grid max-w-[1200px] gap-10 px-4 py-16 md:px-8 md:py-24 lg:grid-cols-[1fr_420px]">
         <div className="flex flex-col gap-6">
           <span data-reveal className="micro text-signal">The one to watch</span>
-          <h2 id="top-title" data-reveal className="display-xl text-[clamp(44px,7vw,112px)]">
+          <h2 id="top-title" data-rise className="display-xl text-[clamp(44px,7vw,112px)]">
             {c.ai.name}
           </h2>
           <div data-reveal className="flex flex-col gap-3">
@@ -42,19 +42,19 @@ export function TopOpportunity({ brief, run }: { brief: Brief; run: RadarRun }) 
           <dl className="grid grid-cols-2 gap-4">
             <div>
               <dt className="micro text-fg-3">Creators</dt>
-              <dd className="tabular text-3xl font-bold">{c.metrics.creatorCount}</dd>
+              <dd data-count={c.metrics.creatorCount} className="tabular text-3xl font-bold">{c.metrics.creatorCount}</dd>
             </div>
             <div>
               <dt className="micro text-fg-3">Videos</dt>
-              <dd className="tabular text-3xl font-bold">{c.metrics.videoCount}</dd>
+              <dd data-count={c.metrics.videoCount} className="tabular text-3xl font-bold">{c.metrics.videoCount}</dd>
             </div>
             <div>
               <dt className="micro text-fg-3">Trend score</dt>
-              <dd className="tabular text-3xl font-bold text-signal">{c.score}</dd>
+              <dd data-count={c.score} className="tabular text-3xl font-bold text-signal">{c.score}</dd>
             </div>
             <div>
               <dt className="micro text-fg-3">Last 72h</dt>
-              <dd className="tabular text-3xl font-bold">{c.metrics.recentUploads}</dd>
+              <dd data-count={c.metrics.recentUploads} className="tabular text-3xl font-bold">{c.metrics.recentUploads}</dd>
             </div>
           </dl>
           <p className="text-sm text-fg-3">

@@ -28,7 +28,7 @@ export function ScoreAnatomy({ score, breakdown }: { score: number; breakdown: S
                 {LABELS[k]} <span className="micro text-fg-3">{Math.round(WEIGHTS[k] * 100)}%</span>
               </span>
               <span className="relative h-1.5 bg-bg-3" aria-hidden>
-                <span className="absolute inset-y-0 left-0 bg-fg" style={{ width: `${breakdown[k] * 100}%` }} />
+                <span data-bar className="absolute inset-y-0 left-0 bg-fg" style={{ width: `${breakdown[k] * 100}%` }} />
               </span>
               <span className="micro tabular text-right text-fg">+{pts.toFixed(1)}</span>
             </li>
