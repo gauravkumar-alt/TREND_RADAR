@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>TREND//RADAR | Components Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  @page { size: 1900px 1480px; margin: 0; }
+  :root {
+    --navy: #17375e;
+    --ink: #13233a;
+    --muted: #5b6676;
+    --label: 190px;
+    --col: 272px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #f6f8fb; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: var(--ink); width: 1900px; }
+  .page { position: relative; padding: 26px 30px 24px 22px; }
+  h1 { margin: 0; text-align: center; font-size: 40px; font-weight: 800; letter-spacing: -0.02em; }
+  h1 .sig { color: #2f7d0e; }
+  .sub { margin: 6px 0 22px; text-align: center; font-size: 19px; color: #2563eb; }
+
+  .grid { position: relative; display: grid; grid-template-columns: var(--label) repeat(6, var(--col)); border-radius: 4px; overflow: visible; }
+  .th { background: var(--navy); color: #fff; font-weight: 600; font-size: 17px; height: 56px; display: flex; align-items: center; justify-content: center; border-left: 1px solid #2b4c76; }
+  .th:first-child { border-left: 0; }
+  .lane { display: contents; }
+  .cell { border-top: 1px solid rgba(23, 55, 94, 0.08); border-left: 1px solid rgba(23, 55, 94, 0.06); position: relative; display: flex; align-items: center; justify-content: center; padding: 12px 14px; }
+  .who { justify-content: flex-start; padding-left: 20px; flex-direction: column; align-items: flex-start; }
+  .who b { font-size: 17px; font-weight: 700; }
+  .who span { font-size: 16px; color: #3a4658; }
+
+  .card { position: relative; z-index: 2; width: 100%; background: #fff; border-radius: 12px; border: 1.5px solid var(--edge, #c9d6ea); box-shadow: 0 2px 6px rgba(19, 35, 58, 0.07); padding: 13px 14px; display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: start; }
+  .icon { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+  .icon svg { width: 21px; height: 21px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card h3 { margin: 1px 0 4px; font-size: 15.5px; line-height: 1.25; font-weight: 700; }
+  .card p { margin: 0; font-size: 12.8px; line-height: 1.5; color: var(--muted); }
+  .card ul { margin: 0; padding-left: 16px; font-size: 12.8px; line-height: 1.5; color: var(--muted); }
+  .card li::marker { color: var(--accent); }
+
+  svg.arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+  svg.arrows path { fill: none; stroke: var(--navy); stroke-width: 1.8; }
+  svg.arrows path.dash { stroke-dasharray: 6 6; }
+  svg.arrows marker path { fill: var(--navy); stroke: none; stroke-dasharray: none; }
+
+  .legend { margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 34px; font-size: 14.5px; color: #33415a; }
+  .legend span { display: inline-flex; align-items: center; gap: 9px; }
+  .legend i { display: inline-block; width: 34px; border-top: 2px solid var(--navy); }
+  .legend i.d { border-top-style: dashed; }
+  .legend b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>TREND<span class="sig">//</span>RADAR – YouTube Trend Intelligence | Components Map</h1>
+  <p class="sub">From live YouTube data to three outputs (Live Radar, Trend Intelligence, Sunday Brief email)</p>
+
+  <div class="grid" id="grid">
+    <div class="th">Actor / Tool</div><div class="th">Trigger</div><div class="th">Input</div><div class="th">Context</div><div class="th">AI</div><div class="th">Processing</div><div class="th">Output</div>
+  </div>
+
+  <div class="legend">
+    <span><i></i> Solid arrow = Ishaan's own step</span>
+    <span><i class="d"></i> Dashed arrows = data passed between tools</span>
+    <span><b>Every number is calculated by the app.</b> Gemini Flash only writes words.</span>
+    <span>No history yet → shows <b>BUILDING BASELINE</b>, never invented data</span>
+  </div>
+</div>
+
+<script>
+const ICON = {
+  radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6.3-6.3"/>',
+  sliders: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  play: '<rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="M10 9.2v5.6l4.8-2.8z"/>',
+  db: '<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  filter: '<path d="M3 5h18l-7 8.2V19l-4 2v-7.8z"/>',
+  spark: '<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  pulse: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  layout: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>',
+  film: '<rect x="2.5" y="6" width="13.5" height="12" rx="2"/><path d="m16 10.2 5.5-3v9.6l-5.5-3"/>',
+  archive: '<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>',
+};
+
+// Lanes: [name, sub, background, accent, height]
+const LANES = [
+  ["Creator", "(Ishaan)", "#e8f1fb", "#2f6fdb", 150],
+  ["Vercel Cron", "(Scheduler)", "#fbe7ef", "#d6407a", 116],
+  ["YouTube", "(Data API v3)", "#fdecea", "#e0362c", 150],
+  ["Supabase", "(Database)", "#e6f5ec", "#1f9d55", 160],
+  ["Gemini Flash", "(AI)", "#efe9fb", "#7c4ddb", 176],
+  ["TREND//RADAR", "(Engine)", "#fff4dc", "#e58a00", 172],
+  ["Vercel", "(Website)", "#ebeefb", "#4f5bd5", 168],
+  ["Email", "(Resend)", "#fdeee4", "#ea5a1c", 130],
+];
+const COLS = ["trigger", "input", "context", "ai", "processing", "output"];
+
+// Cards: id, lane index, column, icon, title, body (string or list)
+const CARDS = [
+  ["c-run", 0, "trigger", "radar", "Ishaan runs the radar", "Clicks Run Radar on the site, any time he wants a fresh read"],
+  ["c-settings", 0, "input", "sliders", "His channel settings", "Categories (AI tools, productivity, tech reviews), region India, 7-day look-back"],
+  ["c-film", 0, "output", "film", "Films on Monday", "Knows what to make, why now, the format, angle, title and length"],
+  ["c-cron", 1, "trigger", "clock", "Sunday 08:00 IST", "Weekly scan + brief; a daily 06:00 job refreshes view counts"],
+  ["c-yt", 2, "input", "play", "Live YouTube videos", "Keyword search per category + India Science & Tech trending chart; views, likes, comments, duration (≈600 quota units)"],
+  ["c-db", 3, "context", "db", "Saved context", ["Settings", "Daily view snapshots (history)", "Past scans and briefs"]],
+  ["c-saved", 3, "output", "archive", "History saved", "Run, topics, videos, snapshots and the brief are stored for next week"],
+  ["c-ai", 4, "ai", "spark", "Gemini Flash finds the topics", "Groups videos into 3–5 topic clusters, labels formats, writes why-now, angle, title and the brief. Zod-checked, retried once"],
+  ["c-prep", 5, "context", "filter", "Engine prepares the data", "Engagement, views/hour, upload momentum; drops Shorts; sends Gemini a compact 90-video table"],
+  ["c-score", 5, "processing", "pulse", "Engine scores each topic", "0–100 trend score from 6 weighted factors, Rising / Stable / Cooling, confidence; saves the run"],
+  ["c-site", 6, "output", "layout", "Live Radar + Trends + Brief", "Scroll story with rotating topics, 3–5 topics with evidence, score and what to make"],
+  ["c-mail", 7, "output", "mail", "Sunday Brief email", "Arrives before noon IST with the Monday filming plan"],
+];
+
+const grid = document.getElementById("grid");
+const cellOf = {};
+LANES.forEach(([name, sub, bg, accent, h], li) => {
+  const who = document.createElement("div");
+  who.className = "cell who";
+  who.style.background = bg;
+  who.style.height = h + "px";
+  who.innerHTML = `<b>${name}</b><span>${sub}</span>`;
+  grid.appendChild(who);
+  COLS.forEach((c) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.style.background = bg;
+    cell.style.height = h + "px";
+    grid.appendChild(cell);
+    cellOf[li + ":" + c] = cell;
+  });
+});
+CARDS.forEach(([id, li, col, icon, title, body]) => {
+  const accent = LANES[li][3];
+  const card = document.createElement("div");
+  card.className = "card";
+  card.id = id;
+  card.style.setProperty("--accent", accent);
+  card.style.setProperty("--edge", accent + "55");
+  const text = Array.isArray(body) ? `<ul>${body.map((b) => `<li>${b}</li>`).join("")}</ul>` : `<p>${body}</p>`;
+  card.innerHTML = `<div class="icon"><svg viewBox="0 0 24 24">${ICON[icon]}</svg></div><div><h3>${title}</h3>${text}</div>`;
+  cellOf[li + ":" + col].appendChild(card);
+});
+
+// ---- arrows (orthogonal paths between card edges) ----
+const g = grid.getBoundingClientRect();
+const R = (id) => {
+  const r = document.getElementById(id).getBoundingClientRect();
+  return { l: r.left - g.left, r: r.right - g.left, t: r.top - g.top, b: r.bottom - g.top, cx: (r.left + r.right) / 2 - g.left, cy: (r.top + r.bottom) / 2 - g.top };
+};
+const colEdge = (c, side) => {
+  const r = cellOf["0:" + c].getBoundingClientRect();
+  return (side === "l" ? r.left : r.right) - g.left;
+};
+const A = {};
+["c-run", "c-settings", "c-film", "c-cron", "c-yt", "c-db", "c-saved", "c-ai", "c-prep", "c-score", "c-site", "c-mail"].forEach((id) => (A[id] = R(id)));
+
+const svgNS = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(svgNS, "svg");
+svg.setAttribute("class", "arrows");
+svg.innerHTML = `<defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#17375e"/></marker></defs>`;
+grid.appendChild(svg);
+const line = (pts, dashed = true, head = true) => {
+  const p = document.createElementNS(svgNS, "path");
+  p.setAttribute("d", pts.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" "));
+  if (dashed) p.setAttribute("class", "dash");
+  if (head) p.setAttribute("marker-end", "url(#head)");
+  svg.appendChild(p);
+};
+const gap = 3;
+const { "c-run": run, "c-settings": set, "c-film": film, "c-cron": cron, "c-yt": yt, "c-db": db, "c-saved": saved, "c-ai": ai, "c-prep": prep, "c-score": score, "c-site": site, "c-mail": mail } = A;
+
+// Ishaan's own step: run -> settings
+line([[run.r, run.cy], [set.l - gap, set.cy]], false);
+// settings -> YouTube (what to search)
+line([[set.cx - 30, set.b], [set.cx - 30, yt.t - gap]]);
+// settings -> Supabase (saved)
+line([[set.r, set.cy], [db.cx, set.cy], [db.cx, db.t - gap]]);
+// cron -> YouTube (weekly run)
+line([[cron.r, cron.cy], [yt.cx + 40, cron.cy], [yt.cx + 40, yt.t - gap]]);
+// YouTube -> engine prep
+line([[yt.cx, yt.b], [yt.cx, prep.cy], [prep.l - gap, prep.cy]]);
+// Supabase -> engine prep (settings + history)
+line([[db.cx, db.b], [db.cx, prep.t - gap]]);
+// prep -> Gemini
+line([[prep.r, prep.cy], [ai.cx, prep.cy], [ai.cx, ai.b + gap]]);
+// Gemini -> scoring
+line([[ai.r, ai.cy], [score.cx, ai.cy], [score.cx, score.t - gap]]);
+// scoring -> outputs via a trunk on the column boundary
+const tx = colEdge("processing", "r");
+line([[score.r, score.cy], [tx, score.cy], [tx, saved.cy], [saved.l - gap, saved.cy]]);
+line([[tx, score.cy], [tx, site.cy], [site.l - gap, site.cy]]);
+line([[tx, site.cy], [tx, mail.cy], [mail.l - gap, mail.cy]]);
+// website + email -> Ishaan films on Monday (right-hand gutter)
+const gx = colEdge("output", "r") + 14;
+line([[mail.r, mail.cy], [gx, mail.cy], [gx, film.cy], [film.r + gap, film.cy]]);
+line([[site.r, site.cy], [gx, site.cy]], true, false);
+
+document.body.dataset.ready = "1";
+</script>
+</body>
+</html>
