@@ -22,7 +22,7 @@ export function TrendFormation({ cluster, videos }: { cluster: TrendCluster; vid
     () =>
       cards.map((_, i) => {
         const a = (i / cards.length) * Math.PI * 2 - Math.PI / 2 + (i % 2 ? 0.18 : -0.12);
-        return { x: Math.cos(a) * 520, y: Math.sin(a) * 270, r: ((i * 37) % 14) - 7 };
+        return { x: Math.round(Math.cos(a) * 520), y: Math.round(Math.sin(a) * 270), r: ((i * 37) % 14) - 7 };
       }),
     [cards],
   );

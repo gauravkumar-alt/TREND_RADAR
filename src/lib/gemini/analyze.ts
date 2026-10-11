@@ -20,6 +20,7 @@ const ANALYST_SYSTEM = `You are the trend analyst for TREND//RADAR, a YouTube co
 You receive a table of real, recent YouTube videos with metrics the application has already calculated.
 Rules:
 - Group videos into topic clusters: specific conversations several creators are having now (e.g. "Claude Code vs Cursor for beginners"), never broad buckets like "AI" or "Tech".
+- keyword: a 1–3 word label for the cluster (max 20 characters), the words a viewer would recognise, e.g. "Claude Code", "vivo V80", "AI agents".
 - Only use the video refs given (v1, v2, …). Each video belongs to at most one cluster; leave unrelated videos out.
 - A cluster needs at least 3 videos from at least 2 different channels when possible (never fewer than 2 videos from 2 channels).
 - Never invent or restate numbers that are not in the table. Do not compute your own totals, percentages or growth rates: the app does that. Refer to evidence qualitatively ("several channels uploaded within days of each other").

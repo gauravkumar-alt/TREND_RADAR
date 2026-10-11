@@ -11,6 +11,7 @@ import { RunRadarButton } from "@/components/shared/RunRadarButton";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RadarSignalField } from "./RadarSignalField";
+import { TopicOrbit } from "./TopicOrbit";
 import type { RadarRun } from "@/lib/types";
 
 interface Props {
@@ -38,9 +39,6 @@ export function RadarHero({ run, regionCode, categories, failure }: Props) {
   return (
     <section ref={root} className="relative flex min-h-[calc(100svh-3.5rem)] flex-col overflow-hidden border-b border-line" aria-labelledby="hero-title">
       <div data-hero-grid className="grid-lines grid-fade pointer-events-none absolute inset-0 opacity-60" aria-hidden />
-      <div className="pointer-events-none absolute right-[-18vw] top-1/2 w-[86vw] max-w-[900px] -translate-y-1/2 opacity-90 md:right-[-6vw] md:w-[58vw]" aria-hidden={!run}>
-        <RadarSignalField run={run} className="h-auto w-full" />
-      </div>
 
       <div className="relative mx-auto flex w-full max-w-[1600px] flex-1 flex-col justify-between gap-10 px-4 pb-8 pt-8 md:px-8 md:pt-12">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -75,6 +73,15 @@ export function RadarHero({ run, regionCode, categories, failure }: Props) {
               Pattern-level intelligence for your next video.
             </p>
           </div>
+          <div className="relative mx-auto mb-4 aspect-square w-full max-w-[440px] md:absolute md:mb-0 md:right-[2vw] md:top-[44%] md:mx-0 md:w-[min(46vw,64svh,760px)] md:max-w-none md:-translate-y-1/2">
+            <RadarSignalField run={run} className="absolute inset-0 h-full w-full opacity-90" />
+            {run && <TopicOrbit clusters={run.clusters} />}
+            {run && run.clusters.length > 0 && (
+              <p data-hero-meta className="micro absolute inset-x-0 -bottom-2 text-center text-[10px] text-fg-3 md:-bottom-6 md:text-[11px]">
+                Trend score / 100 · tap a topic to open it
+              </p>
+            )}
+          </div>
           <ul className="flex flex-wrap gap-2" aria-label="Scan scope">
             {tags.map((t) => (
               <li key={t} data-hero-meta className="micro border border-line-2 px-2.5 py-1.5 text-fg-2">
@@ -84,7 +91,7 @@ export function RadarHero({ run, regionCode, categories, failure }: Props) {
           </ul>
         </div>
 
-        <div className="flex flex-col gap-8 border-t border-line pt-6 md:flex-row md:items-end md:justify-between">
+        <div className="relative z-10 flex flex-col gap-8 border-t border-line bg-bg/60 pt-6 backdrop-blur-[2px] md:flex-row md:items-end md:justify-between">
           <dl className="grid grid-cols-3 gap-6 md:gap-14">
             <div data-hero-meta className="flex flex-col gap-1">
               <dt className="micro text-fg-3">{failure ? "Last successful scan" : "Last scan"}</dt>

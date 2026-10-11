@@ -6,6 +6,7 @@ const text = (max: number) => z.string().trim().min(1).max(max);
 
 export const geminiClusterSchema = z.object({
   name: text(60),
+  keyword: z.string().trim().min(1).max(24).optional(),
   summary: text(400),
   videoRefs: z.array(z.string()).min(2),
   whyNow: text(600),
@@ -88,6 +89,7 @@ export const ANALYSIS_RESPONSE_SCHEMA = S("OBJECT", {
       items: S("OBJECT", {
         properties: {
           name: S("STRING"),
+          keyword: S("STRING"),
           summary: S("STRING"),
           videoRefs: S("ARRAY", { items: S("STRING") }),
           whyNow: S("STRING"),
@@ -107,8 +109,8 @@ export const ANALYSIS_RESPONSE_SCHEMA = S("OBJECT", {
             required: ["shouldCover", "reason", "angle", "possibleTitle", "format"],
           }),
         },
-        required: ["name", "summary", "videoRefs", "whyNow", "momentumNarrative", "audienceSignals", "formats", "recommendation"],
-        propertyOrdering: ["name", "videoRefs", "formats", "summary", "whyNow", "momentumNarrative", "audienceSignals", "recommendation"],
+        required: ["name", "keyword", "summary", "videoRefs", "whyNow", "momentumNarrative", "audienceSignals", "formats", "recommendation"],
+        propertyOrdering: ["name", "keyword", "videoRefs", "formats", "summary", "whyNow", "momentumNarrative", "audienceSignals", "recommendation"],
       }),
     }),
   },

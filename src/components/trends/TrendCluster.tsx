@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { prefersReducedMotion } from "@/lib/animations/motion";
@@ -25,6 +25,10 @@ function Block({ title, children, className }: { title: string; children: React.
 
 export function TrendCluster({ cluster, run, defaultOpen = false }: { cluster: Cluster; run: RadarRun; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
+  // Arriving via /trends#cN (e.g. from the radar orbit) opens that topic and closes the default one.
+  useEffect(() => {
+    setOpen(defaultOpen);
+  }, [defaultOpen]);
   const panel = useRef<HTMLDivElement>(null);
   const first = useRef(true);
 
@@ -48,7 +52,7 @@ export function TrendCluster({ cluster, run, defaultOpen = false }: { cluster: C
   const panelId = `${cluster.id}-detail`;
 
   return (
-    <article id={cluster.id} className="scroll-mt-20 border-t border-line-2 py-10 md:py-14" aria-labelledby={`${cluster.id}-title`}>
+    <article id={cluster.id} className="scroll-mt-44 border-t border-line-2 py-10 md:py-14" aria-labelledby={`${cluster.id}-title`}>
       <div className="grid gap-6 md:grid-cols-[120px_1fr] md:gap-10">
         <div className="flex items-start gap-4 md:flex-col">
           <span className="display-xl tabular text-6xl text-fg-3 md:text-8xl">{String(cluster.rank).padStart(2, "0")}</span>

@@ -8,6 +8,7 @@ import type { RadarRun } from "@/lib/types";
 
 /**
  * Radar plot of the latest scan. Each dot is a real video:
+ * Topic labels are rendered by TopicOrbit on top of this plot.
  *   angle  = its cluster's sector (unclustered reel videos sit between sectors)
  *   radius = age (newest near the centre — closest to "about to trend")
  *   size   = log views/hour
@@ -15,7 +16,7 @@ import type { RadarRun } from "@/lib/types";
  */
 export function RadarSignalField({ run, className }: { run: RadarRun | null; className?: string }) {
   const ref = useRef<SVGSVGElement>(null);
-  const { dots, labels } = useMemo(() => layout(run), [run]);
+  const { dots, clusterCount } = useMemo(() => layout(run), [run]);
 
   useGSAP(
     () => {
@@ -29,7 +30,7 @@ export function RadarSignalField({ run, className }: { run: RadarRun | null; cla
   );
 
   return (
-    <svg ref={ref} viewBox="-260 -260 520 520" className={className} role="img" aria-label={run ? `Radar plot of ${dots.length} live videos across ${labels.length} topic clusters` : "Empty radar: no scan yet"}>
+    <svg ref={ref} viewBox="-260 -260 520 520" className={className} role="img" aria-label={run ? `Radar plot of ${dots.length} live videos across ${clusterCount} topic clusters` : "Empty radar: no scan yet"}>
       <defs>
         <radialGradient id="sweepFade" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="scale(240)">
           <stop offset="0" stopColor="var(--signal)" stopOpacity="0.22" />
@@ -51,19 +52,6 @@ export function RadarSignalField({ run, className }: { run: RadarRun | null; cla
           <title>{d.title}</title>
         </circle>
       ))}
-      {labels.map((l) => (
-        <text
-          key={l.text}
-          data-signal-label
-          x={l.x}
-          y={l.y}
-          textAnchor={l.x > 10 ? "start" : l.x < -10 ? "end" : "middle"}
-          className="fill-fg-2"
-          style={{ font: "500 10px var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase" }}
-        >
-          {l.text.length > 26 ? l.text.slice(0, 25) + "…" : l.text}
-        </text>
-      ))}
       <circle r="3" fill="var(--signal)" />
     </svg>
   );
@@ -73,7 +61,7 @@ export function RadarSignalField({ run, className }: { run: RadarRun | null; cla
 const round = (n: number) => Math.round(n * 100) / 100;
 
 function layout(run: RadarRun | null) {
-  if (!run) return { dots: [], labels: [] };
+  if (!run) return { dots: [], clusterCount: 0 };
   const clusters = run.clusters;
   const sector = (2 * Math.PI) / Math.max(1, clusters.length);
   const maxAge = run.settings.lookbackDays * 24;
@@ -98,9 +86,5 @@ function layout(run: RadarRun | null) {
     });
   });
   run.reelVideoIds.forEach((id, i) => place(id, i * 1.7 + 0.4, false));
-  const labels = clusters.map((c, ci) => {
-    const a = ci * sector - Math.PI / 2 + sector / 2;
-    return { text: c.ai.name, x: round(Math.cos(a) * 252), y: round(Math.sin(a) * 252 + 3) };
-  });
-  return { dots, labels };
+  return { dots, clusterCount: clusters.length };
 }

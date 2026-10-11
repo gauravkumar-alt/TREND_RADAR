@@ -68,3 +68,14 @@ describe("cluster facts", () => {
     expect(confidenceOf({ ...m, videoCount: 2, creatorCount: 2 }, "coverage").confidence).toBe("LOW");
   });
 });
+
+import { clusterKeyword } from "@/lib/trends/keyword";
+describe("cluster keyword", () => {
+  const c = (name: string, keyword?: string) => ({ ai: { name, keyword } }) as Parameters<typeof clusterKeyword>[0];
+  it("prefers Gemini's keyword", () => expect(clusterKeyword(c("Long name here", "AI agents"))).toBe("AI agents"));
+  it("shortens long names", () => {
+    expect(clusterKeyword(c("vivo V80 and OriginOS Launch in India"))).toBe("vivo V80");
+    expect(clusterKeyword(c("Consumer AI Agents: Meta Muse and ChatGPT Dots"))).toBe("Consumer AI Agents");
+    expect(clusterKeyword(c("Free Video Automation Workarounds Post-Google Flow"))).toBe("Free Video Automation");
+  });
+});

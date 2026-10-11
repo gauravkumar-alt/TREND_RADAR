@@ -41,8 +41,20 @@ export function TrendOverview({ serverRun, pinnedRunId, failure, history, settin
   const list = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setHash(window.location.hash.slice(1) || null);
+    const read = () => {
+      setHash(window.location.hash.slice(1) || null);
+    };
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
   }, []);
+
+  // Scroll once the hashed topic has opened (and the default one has closed).
+  useEffect(() => {
+    if (!hash) return;
+    const t = setTimeout(() => document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+    return () => clearTimeout(t);
+  }, [hash]);
 
   const allCategories = useMemo(() => {
     const map = new Map<string, CategoryDef>();

@@ -112,6 +112,8 @@ export interface ViewHistoryPoint {
 
 export interface ClusterAI {
   name: string;
+  /** 1–3 word label for the radar orbit. Optional: older scans don't have it. */
+  keyword?: string;
   summary: string;
   whyNow: string;
   momentumNarrative: string;

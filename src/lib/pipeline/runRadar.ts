@@ -119,6 +119,7 @@ export function buildClusters(
         rank: 0,
         ai: {
           name: ai.name,
+          keyword: ai.keyword,
           summary: ai.summary,
           whyNow: ai.whyNow,
           momentumNarrative: ai.momentumNarrative,
