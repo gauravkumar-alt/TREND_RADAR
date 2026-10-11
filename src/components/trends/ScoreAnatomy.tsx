@@ -1,4 +1,5 @@
 import { WEIGHTS } from "@/lib/trends/scoring";
+import { Provenance } from "@/components/shared/Provenance";
 import type { ScoreBreakdown } from "@/lib/types";
 
 const LABELS: Record<keyof ScoreBreakdown, string> = {
@@ -14,6 +15,10 @@ const LABELS: Record<keyof ScoreBreakdown, string> = {
 export function ScoreAnatomy({ score, breakdown }: { score: number; breakdown: ScoreBreakdown }) {
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <Provenance kind="calculated" />
+        <span className="micro text-fg-3">normalised against this week&apos;s other clusters</span>
+      </div>
       <ul className="flex flex-col gap-2.5">
         {(Object.keys(WEIGHTS) as (keyof ScoreBreakdown)[]).map((k) => {
           const pts = breakdown[k] * WEIGHTS[k] * 100;
@@ -31,8 +36,8 @@ export function ScoreAnatomy({ score, breakdown }: { score: number; breakdown: S
         })}
       </ul>
       <div className="flex items-center justify-between border-t border-line pt-3">
-        <span className="text-xs text-fg-3">Each part is compared with this week&apos;s other topics.</span>
-        <span className="tabular text-2xl font-bold text-signal">{score}<span className="micro text-fg-3">/100</span></span>
+        <span className="micro text-fg-3">Trend score</span>
+        <span className="tabular text-2xl font-bold text-signal">{score}</span>
       </div>
     </div>
   );

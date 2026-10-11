@@ -49,6 +49,9 @@ export function RadarHero({ run, regionCode, categories, failure }: Props) {
             </span>
             Live radar · {longDate(new Date().toISOString())}
           </span>
+          <span data-hero-meta className="micro text-fg-3">
+            Issue {run ? run.id.slice(0, 6).toUpperCase() : "—"}
+          </span>
         </div>
 
         <div className="flex flex-col gap-6">

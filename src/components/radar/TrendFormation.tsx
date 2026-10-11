@@ -31,7 +31,7 @@ export function TrendFormation({ cluster, videos }: { cluster: TrendCluster; vid
   const stats: { label: string; value: number | null; format: (n: number) => string; fallback: string; kind: "calculated" | "observed" }[] = [
     { label: "Creators", value: m.creatorCount, format: (n) => String(Math.round(n)), fallback: "—", kind: "calculated" },
     { label: "Videos", value: m.videoCount, format: (n) => String(Math.round(n)), fallback: "—", kind: "calculated" },
-    { label: "Coverage change", value: m.coverageGrowth, format: (n) => signedPct(n), fallback: "Building baseline", kind: "calculated" },
+    { label: "Coverage", value: m.coverageGrowth, format: (n) => signedPct(n), fallback: "Building baseline", kind: "calculated" },
     { label: "Avg duration", value: m.avgDurationSeconds, format: (n) => formatDurationWords(Math.round(n)), fallback: "—", kind: "calculated" },
     { label: "Trend score", value: cluster.score, format: (n) => String(Math.round(n)), fallback: "—", kind: "calculated" },
   ];

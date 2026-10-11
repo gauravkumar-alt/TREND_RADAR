@@ -1,9 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings as SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "./ThemeToggle";
 
 const LINKS = [
   { href: "/radar", label: "Radar", n: "01" },
@@ -43,10 +41,9 @@ export function TopNav() {
         >
           Settings
         </Link>
-        <Link href="/settings" className="flex size-9 items-center justify-center text-fg-3 hover:text-fg md:hidden" aria-label="Settings">
-          <SettingsIcon className="size-4" aria-hidden />
+        <Link href="/settings" className="micro flex h-9 items-center px-1 text-fg-3 hover:text-fg md:hidden" aria-label="Settings">
+          ⚙
         </Link>
-        <ThemeToggle />
       </nav>
     </header>
   );

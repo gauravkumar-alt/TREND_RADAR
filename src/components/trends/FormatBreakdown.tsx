@@ -1,13 +1,20 @@
 import { compact } from "@/lib/format";
+import { Provenance } from "@/components/shared/Provenance";
 import type { FormatShare } from "@/lib/types";
 
 /** Percentages are only shown when at least 3 videos were classified; otherwise counts only. */
 export function FormatBreakdown({ formats }: { formats: FormatShare[] }) {
   const classified = formats.reduce((a, f) => a + f.count, 0);
   const showPct = classified >= 3;
-  if (!formats.length) return <p className="text-sm text-fg-3">No format data for this topic.</p>;
+  if (!formats.length) return <p className="text-sm text-fg-3">No format classifications for this cluster.</p>;
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Provenance kind="ai" />
+        <span className="micro text-fg-3">labels per video</span>
+        <Provenance kind="calculated" />
+        <span className="micro text-fg-3">shares + views/hour</span>
+      </div>
       <ul className="flex flex-col gap-3">
         {formats.map((f) => (
           <li key={f.format} className="grid grid-cols-[110px_1fr_auto] items-center gap-3 md:grid-cols-[140px_1fr_140px]">
@@ -23,7 +30,7 @@ export function FormatBreakdown({ formats }: { formats: FormatShare[] }) {
         ))}
       </ul>
       <p className="text-xs text-fg-3">
-        Formats labelled by AI across {classified} video{classified === 1 ? "" : "s"}; shares and views per hour calculated.
+        {classified} video{classified === 1 ? "" : "s"} classified.{!showPct && " Too few to show percentages."}
       </p>
     </div>
   );

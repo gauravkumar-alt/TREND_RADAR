@@ -1,11 +1,16 @@
 import Image from "next/image";
 import { ago, compact, ytUrl } from "@/lib/format";
 import { formatDuration } from "@/lib/youtube/duration";
+import { Provenance } from "@/components/shared/Provenance";
 import type { Video, VideoFormat } from "@/lib/types";
 
 export function EvidenceVideos({ videos, formats }: { videos: Video[]; formats: Record<string, VideoFormat> }) {
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <Provenance kind="observed" />
+        <span className="micro text-fg-3">representative videos, fastest first</span>
+      </div>
       <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {videos.slice(0, 5).map((v) => (
           <li key={v.id}>

@@ -41,7 +41,7 @@ export function BriefExperience({ brief, run, emailConfigured, recipient, lastDe
       <div className="border-b border-line">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-5 md:flex-row md:items-center md:justify-between md:px-8">
           <p className="micro text-fg-3">
-            Written {ago(brief.createdAt)} · {istDateTime(brief.createdAt)} IST
+            Written {istDateTime(brief.createdAt)} IST ({ago(brief.createdAt)}) by {brief.model} from the scan of {istDateTime(run.completedAt)}.
             {newerUnsaved && <span className="text-cool"> A newer unsaved scan exists in this session.</span>}
           </p>
           <div className="flex flex-wrap items-start gap-4">
