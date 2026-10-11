@@ -2,7 +2,7 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { reelScene, revealOnScroll } from "@/lib/animations/presets";
+import { reelMobile, reelScene } from "@/lib/animations/presets";
 import { TrendingVideo } from "./TrendingVideo";
 import type { Video, VideoSignals } from "@/lib/types";
 
@@ -25,7 +25,7 @@ export function ScrollVideoReel({ videos, signals }: { videos: Video[]; signals:
       });
     });
     mm.add(MEDIA.mobile, () => {
-      if (mobile.current) revealOnScroll(mobile.current.querySelectorAll("article"));
+      if (mobile.current) reelMobile(mobile.current);
     });
     return () => mm.revert();
   });

@@ -29,7 +29,7 @@ interface Props {
   dbError: string | null;
 }
 
-const selectCls = "h-10 w-full appearance-none border border-line-2 bg-bg px-3 pr-8 text-sm text-fg hover:border-fg-2 focus:border-signal";
+const selectCls = "h-10 w-full appearance-none border border-line-2 bg-bg px-3 pr-8 text-base text-fg sm:text-sm hover:border-fg-2 focus:border-signal";
 
 export function TrendOverview({ serverRun, pinnedRunId, failure, history, settingsCategories, regionCode, lookbackDays, dbError }: Props) {
   const latest = useCurrentRun(serverRun);
@@ -235,7 +235,7 @@ export function TrendOverview({ serverRun, pinnedRunId, failure, history, settin
                   {h.status} {h.trigger === "cron" ? "· cron" : ""}
                 </span>
                 {h.status === "succeeded" ? (
-                  <Link href={`/trends?run=${h.id}`} className="micro text-right text-fg underline decoration-line-2 underline-offset-4 hover:decoration-fg md:text-left" aria-current={h.id === run?.id ? "true" : undefined}>
+                  <Link href={`/trends?run=${h.id}`} className="micro -my-2 py-3 text-right text-fg underline decoration-line-2 underline-offset-4 hover:decoration-fg md:text-left" aria-current={h.id === run?.id ? "true" : undefined}>
                     {h.id === run?.id ? "Viewing" : "Open"}
                   </Link>
                 ) : (

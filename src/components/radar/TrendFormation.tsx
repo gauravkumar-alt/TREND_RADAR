@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useMemo, useRef } from "react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { countUp, formationScene, revealOnScroll } from "@/lib/animations/presets";
+import { countUp, formationMobile, formationScene } from "@/lib/animations/presets";
 import { compact, signedPct } from "@/lib/format";
 import { formatDurationWords } from "@/lib/youtube/duration";
 import { Provenance } from "@/components/shared/Provenance";
@@ -28,12 +28,12 @@ export function TrendFormation({ cluster, videos }: { cluster: TrendCluster; vid
   );
 
   const m = cluster.metrics;
-  const stats: { label: string; value: number | null; format: (n: number) => string; fallback: string; kind: "calculated" | "observed" }[] = [
-    { label: "Creators", value: m.creatorCount, format: (n) => String(Math.round(n)), fallback: "—", kind: "calculated" },
-    { label: "Videos", value: m.videoCount, format: (n) => String(Math.round(n)), fallback: "—", kind: "calculated" },
-    { label: "Coverage", value: m.coverageGrowth, format: (n) => signedPct(n), fallback: "Building baseline", kind: "calculated" },
-    { label: "Avg duration", value: m.avgDurationSeconds, format: (n) => formatDurationWords(Math.round(n)), fallback: "—", kind: "calculated" },
-    { label: "Trend score", value: cluster.score, format: (n) => String(Math.round(n)), fallback: "—", kind: "calculated" },
+  const stats: { label: string; value: number | null; format: (n: number) => string; fmt: string; fallback: string; kind: "calculated" | "observed" }[] = [
+    { label: "Creators", value: m.creatorCount, format: (n) => String(Math.round(n)), fmt: "int", fallback: "—", kind: "calculated" },
+    { label: "Videos", value: m.videoCount, format: (n) => String(Math.round(n)), fmt: "int", fallback: "—", kind: "calculated" },
+    { label: "Coverage", value: m.coverageGrowth, format: (n) => signedPct(n), fmt: "spct", fallback: "Building baseline", kind: "calculated" },
+    { label: "Avg duration", value: m.avgDurationSeconds, format: (n) => formatDurationWords(Math.round(n)), fmt: "duration", fallback: "—", kind: "calculated" },
+    { label: "Trend score", value: cluster.score, format: (n) => String(Math.round(n)), fmt: "int", fallback: "—", kind: "calculated" },
   ];
 
   useGSAP(
@@ -45,7 +45,7 @@ export function TrendFormation({ cluster, videos }: { cluster: TrendCluster; vid
         formationScene(ref.current, () => {
           if (counted || !ref.current) return;
           counted = true;
-          ref.current.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
+          ref.current.querySelectorAll<HTMLElement>("[data-count][data-idx]").forEach((el) => {
             const to = Number(el.dataset.count);
             const s = stats[Number(el.dataset.idx)];
             if (Number.isFinite(to)) countUp(el, to, s.format, 1.1);
@@ -53,7 +53,7 @@ export function TrendFormation({ cluster, videos }: { cluster: TrendCluster; vid
         });
       });
       mm.add(MEDIA.mobile, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-m-reveal]"));
+        if (ref.current) formationMobile(ref.current);
       });
       return () => mm.revert();
     },
@@ -119,22 +119,32 @@ export function TrendFormation({ cluster, videos }: { cluster: TrendCluster; vid
 
       {/* Mobile + reduced motion */}
       <div className="flex flex-col gap-8 px-4 pb-16 pt-20 min-[900px]:hidden motion-reduce:!flex md:px-8">
-        <div data-m-reveal className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {cards.slice(0, 4).map((v) => (
-            <div key={v.id} className="relative aspect-video overflow-hidden bg-bg-3">
+            <div key={v.id} data-m-card className="relative aspect-video overflow-hidden border border-line-2 bg-bg-3">
               <Image src={v.thumbnailUrl} alt="" fill sizes="50vw" className="object-cover opacity-70" />
             </div>
           ))}
         </div>
-        <div data-m-reveal className="flex flex-col gap-3">
+        <div data-m-topic className="flex flex-col gap-3">
           <Provenance kind="ai" className="self-start" />
-          <h2 className="display-xl text-5xl">{cluster.ai.name}</h2>
+          <h2 data-m-topic-title className="display-xl text-5xl">
+            {cluster.ai.name}
+          </h2>
         </div>
-        <dl data-m-reveal className="grid grid-cols-2 gap-6 border-t border-line pt-6">
+        <dl data-m-stats className="grid grid-cols-2 gap-6 border-t border-line pt-6">
           {stats.map((s) => (
-            <div key={s.label} className="flex flex-col gap-1">
+            <div key={s.label} data-m-stat className="flex flex-col gap-1">
               <dt className="micro text-fg-3">{s.label}</dt>
-              <dd className="tabular text-2xl font-bold">{s.value == null ? <span className="micro text-sm text-fg-3">{s.fallback}</span> : s.format(s.value)}</dd>
+              <dd className="tabular text-2xl font-bold">
+                {s.value == null ? (
+                  <span className="micro text-sm text-fg-3">{s.fallback}</span>
+                ) : (
+                  <span data-count={s.value} data-fmt={s.fmt}>
+                    {s.format(s.value)}
+                  </span>
+                )}
+              </dd>
             </div>
           ))}
         </dl>

@@ -2,7 +2,7 @@
 import { Fragment, useRef } from "react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { revealOnScroll, statementScene, topicRevealScene } from "@/lib/animations/presets";
+import { statementMobile, statementScene, topicRevealMobile, topicRevealScene } from "@/lib/animations/presets";
 
 /** "THE INTERNET DOESN'T TREND ONE VIDEO AT A TIME." → "IT TRENDS IN CONVERSATIONS." */
 export function StatementSection() {
@@ -14,7 +14,7 @@ export function StatementSection() {
         if (ref.current) statementScene(ref.current);
       });
       mm.add(MEDIA.mobile, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-m-reveal]"));
+        if (ref.current) statementMobile(ref.current);
       });
       return () => mm.revert();
     },
@@ -53,7 +53,7 @@ export function TopicReveal() {
         if (ref.current) topicRevealScene(ref.current);
       });
       mm.add(MEDIA.mobile, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-m-reveal]"));
+        if (ref.current) topicRevealMobile(ref.current);
       });
       return () => mm.revert();
     },

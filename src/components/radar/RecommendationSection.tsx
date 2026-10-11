@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { revealOnScroll, steppedScene } from "@/lib/animations/presets";
+import { steppedMobile, steppedScene } from "@/lib/animations/presets";
 import { formatDurationWords } from "@/lib/youtube/duration";
 import { Provenance } from "@/components/shared/Provenance";
 import { buttonVariants } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export function RecommendationSection({ cluster, creatorName }: { cluster: Trend
         if (ref.current) steppedScene(ref.current, "[data-step]", "+=150%");
       });
       mm.add(MEDIA.mobile, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-step]"));
+        if (ref.current) steppedMobile(ref.current);
       });
       return () => mm.revert();
     },

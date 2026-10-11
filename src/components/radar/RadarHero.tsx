@@ -125,7 +125,7 @@ export function RadarHero({ run, regionCode, categories, failure }: Props) {
           </p>
         )}
         {run && (
-          <a href="#story" data-hero-meta className="micro flex items-center gap-2 self-start text-fg-3 hover:text-fg">
+          <a href="#story" data-hero-meta className="micro -my-3 flex items-center gap-2 self-start py-3 text-fg-3 hover:text-fg">
             <ArrowDown className="size-3.5" aria-hidden /> Scroll the story
           </a>
         )}

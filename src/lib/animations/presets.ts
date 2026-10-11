@@ -229,6 +229,7 @@ const COUNT_FORMATS: Record<string, (n: number) => string> = {
   compact: (n) => fmtCompact(n),
   pct1: (n) => `${(n * 100).toFixed(1)}%`,
   duration: (n) => formatDurationWords(Math.round(n)),
+  spct: (n) => `${Math.round(n * 100) > 0 ? "+" : ""}${Math.round(n * 100)}%`,
 };
 
 /** Words (or chars) rise out of a mask. */
@@ -373,4 +374,86 @@ export function revealEach(targets: Iterable<Element>, y = 24) {
   for (const el of targets) {
     gsap.from(el, { y, opacity: 0, duration: 0.7, ease: EASE.out, scrollTrigger: { trigger: el, start: "top 90%", toggleActions: PLAY_ONCE } });
   }
+}
+
+// ===========================================================================
+// Phone versions of the Radar scenes: no pinning (pinning fights touch
+// scrolling and mobile browser toolbars), but the same ideas, scrubbed or
+// played as each section scrolls into view.
+// ===========================================================================
+
+/** Reel cards: thumbnail wipes up and settles, title lines rise, stats stagger in. */
+export function reelMobile(root: Element) {
+  root.querySelectorAll("article").forEach((card) => {
+    const tl = gsap.timeline({ scrollTrigger: { trigger: card, start: "top 85%", toggleActions: PLAY_ONCE }, defaults: { ease: EASE.expo } });
+    tl.fromTo(card.querySelector("[data-reel-media]"), { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1, ease: EASE.inOut })
+      .from(card.querySelector("[data-reel-img]"), { scale: 1.25, duration: 1.2 }, "<")
+      .from(card.querySelectorAll("[data-reel-text]"), { yPercent: 100, opacity: 0, duration: 0.8, stagger: 0.08 }, "-=0.6")
+      .from(card.querySelectorAll("[data-reel-meta]"), { y: 14, opacity: 0, duration: 0.5, stagger: 0.04 }, "-=0.5");
+  });
+}
+
+/** Statement: words light up as you scroll, the strike line draws, the answer wipes in. */
+export function statementMobile(section: HTMLElement) {
+  const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: "top 75%", end: "bottom 60%", scrub: 0.5 } });
+  tl.from(section.querySelectorAll("[data-s1] > span"), { opacity: 0.1, stagger: 0.1, duration: 0.5 })
+    .fromTo(section.querySelectorAll("[data-s2]"), { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1, ease: EASE.inOut })
+    .from(section.querySelectorAll("[data-s2-note]"), { opacity: 0, y: 16, duration: 0.5 });
+  return tl;
+}
+
+/** "But the video isn't the story" dims while "THE PATTERN IS." scales down into place. */
+export function topicRevealMobile(section: HTMLElement) {
+  const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: "top 80%", end: "center 45%", scrub: 0.5 } });
+  tl.from(section.querySelectorAll("[data-tr1] > span"), { yPercent: 60, opacity: 0, stagger: 0.1, duration: 0.5 })
+    .to(section.querySelectorAll("[data-tr1]"), { opacity: 0.35, duration: 0.4 })
+    .from(section.querySelectorAll("[data-tr2]"), { scale: 1.8, opacity: 0, duration: 1, ease: EASE.expo }, "<")
+    .from(section.querySelectorAll("[data-tr-rule]"), { scaleX: 0, duration: 0.5 });
+  return tl;
+}
+
+/**
+ * Formation on a phone: the cluster's thumbnails start scattered and tilted,
+ * converge into a tight stack as you scroll, then the topic rises and its
+ * stats count up.
+ */
+export function formationMobile(section: HTMLElement) {
+  const cards = gsap.utils.toArray<HTMLElement>(section.querySelectorAll("[data-m-card]"));
+  const scatter = [
+    { x: -60, y: -40, rotate: -10 },
+    { x: 60, y: -50, rotate: 8 },
+    { x: -50, y: 50, rotate: 6 },
+    { x: 55, y: 45, rotate: -7 },
+  ];
+  const conv = gsap.timeline({ scrollTrigger: { trigger: section, start: "top 85%", end: "top 25%", scrub: 0.6 } });
+  cards.forEach((c, i) => conv.from(c, { ...scatter[i % 4], scale: 0.7, opacity: 0, duration: 1, ease: EASE.out }, i * 0.08));
+  const reveal = gsap.timeline({ scrollTrigger: { trigger: section.querySelector("[data-m-topic]"), start: "top 85%", toggleActions: PLAY_ONCE }, defaults: { ease: EASE.expo } });
+  reveal
+    .add(splitRise(section.querySelector("[data-m-topic-title]"), { stagger: 0.06 }))
+    .from(section.querySelectorAll("[data-m-stat]"), { y: 24, opacity: 0, duration: 0.6, stagger: 0.08 }, "-=0.4")
+    .add(countIn(section.querySelector("[data-m-stats]") ?? section, 1.2), "<");
+}
+
+/** Momentum on a phone: the uploads line draws, the dots pop, the verdict lands. */
+export function momentumMobile(section: HTMLElement) {
+  const line = section.querySelector<SVGPathElement>("[data-momentum-line]");
+  const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: "top 70%", toggleActions: PLAY_ONCE }, defaults: { ease: EASE.expo } });
+  tl.add(splitRise(section.querySelector("[data-momentum-title]"), { stagger: 0.05 }));
+  if (line) {
+    tl.from(line, { drawSVG: "0%", duration: 1.6, ease: EASE.inOut }, "-=0.3")
+      .from(section.querySelectorAll("[data-momentum-area]"), { opacity: 0, duration: 0.8 }, "<0.6")
+      .from(section.querySelectorAll("[data-momentum-dot]"), { scale: 0, transformOrigin: "50% 50%", duration: 0.3, stagger: 0.06 }, "<");
+  }
+  tl.from(section.querySelectorAll("[data-momentum-verdict]"), { scale: 1.5, opacity: 0, transformOrigin: "0% 50%", duration: 0.9 })
+    .from(section.querySelectorAll("[data-momentum-note]"), { y: 16, opacity: 0, duration: 0.5, stagger: 0.08 }, "-=0.4");
+  return tl;
+}
+
+/** Why now / what to make on a phone: the heading rises, then each block steps in. */
+export function steppedMobile(section: HTMLElement, selector = "[data-step]") {
+  const steps = gsap.utils.toArray<HTMLElement>(section.querySelectorAll(selector));
+  const [heading, ...rest] = steps;
+  if (heading) ScrollTrigger.create({ trigger: heading, start: "top 85%", toggleActions: PLAY_ONCE, animation: splitRise(heading.matches("h2") ? heading : heading.querySelector("h2"), { stagger: 0.05 }) });
+  revealEach(rest, 30);
+  countIn(section); // numbers in evidence grids land on their real values even if never animated
 }

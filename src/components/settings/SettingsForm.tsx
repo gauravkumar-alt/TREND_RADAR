@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { cn } from "@/lib/utils";
 
-const field = "h-11 w-full border border-line-2 bg-bg px-3 text-sm text-fg placeholder:text-fg-3 hover:border-fg-2 focus:border-signal";
+const field = "h-11 w-full border border-line-2 bg-bg px-3 text-base text-fg sm:text-sm placeholder:text-fg-3 hover:border-fg-2 focus:border-signal";
 
 function Row({ label, hint, children, htmlFor }: { label: string; hint?: string; children: React.ReactNode; htmlFor?: string }) {
   return (

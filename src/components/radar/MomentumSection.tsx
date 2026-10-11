@@ -2,7 +2,7 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { momentumScene, revealOnScroll } from "@/lib/animations/presets";
+import { momentumMobile, momentumScene } from "@/lib/animations/presets";
 import { signedPct } from "@/lib/format";
 import { MomentumChart, ViewHistoryChart } from "@/components/trends/MomentumChart";
 import { Provenance } from "@/components/shared/Provenance";
@@ -19,7 +19,7 @@ export function MomentumSection({ cluster }: { cluster: TrendCluster }) {
         if (ref.current) momentumScene(ref.current);
       });
       mm.add(MEDIA.mobile, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-m-reveal]"));
+        if (ref.current) momentumMobile(ref.current);
       });
       return () => mm.revert();
     },

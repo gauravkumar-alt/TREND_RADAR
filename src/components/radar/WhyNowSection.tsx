@@ -2,7 +2,7 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/animations/gsap";
 import { MEDIA } from "@/lib/animations/motion";
-import { revealOnScroll, steppedScene } from "@/lib/animations/presets";
+import { steppedMobile, steppedScene } from "@/lib/animations/presets";
 import { ago, compact, pct } from "@/lib/format";
 import { Provenance } from "@/components/shared/Provenance";
 import type { TrendCluster, Video } from "@/lib/types";
@@ -16,7 +16,7 @@ export function WhyNowSection({ cluster, videos }: { cluster: TrendCluster; vide
         if (ref.current) steppedScene(ref.current, "[data-step]", "+=150%");
       });
       mm.add(MEDIA.mobile, () => {
-        if (ref.current) revealOnScroll(ref.current.querySelectorAll("[data-step]"));
+        if (ref.current) steppedMobile(ref.current);
       });
       return () => mm.revert();
     },
