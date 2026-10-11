@@ -92,6 +92,7 @@ sequenceDiagram
 flowchart LR
     page[radar/page.tsx<br/>server: loadPageData] --> RE[RadarExperience]
     RE --> RH[RadarHero] --> RSF[RadarSignalField]
+    RH --> TOB[TopicOrbit]
     RE --> SS[StatementSection]
     RE --> SVR[ScrollVideoReel] --> TV[TrendingVideo ×5]
     RE --> TR[TopicReveal]
@@ -105,6 +106,7 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | `RadarExperience` | Orders the scroll story; picks the newest run (server or session) | `RadarRun` | `loadPageData` → Supabase | — | `ScrollTrigger.refresh` after mount | `useCurrentRun` (context) |
 | `RadarHero` | Full-screen title, scope tags, last scan / videos analysed / active signals, CTAs, last-successful-scan banner | run, settings, failure | — | — | `heroIntro`: line mask → tagline → meta → dots → CTA last; grid drift | none |
+| `TopicOrbit` | This week's 3–4 topics as keyword + trend-score chips orbiting the radar; pause on hover/focus; each opens `/trends#cN` | run.clusters (keyword from AI, score CALCULATED) | — | keyword | GSAP rotation timeline + counter-rotation, pop-in | none |
 | `RadarSignalField` | SVG radar; each dot is a real video (angle = cluster, radius = age, size = views/h) | run.clusters, signals | — | cluster labels (AI names) | `radarAmbient`: sweep rotation, dot breathing | memoised layout |
 | `StatementSection` | "Doesn't trend one video at a time" → "Trends in conversations" | static copy | — | — | `statementScene`: pin + scrub, word light-up, strike, clip-path reveal | none |
 | `ScrollVideoReel` | Scroll-controlled reel of the 5 fastest videos | `reelVideoIds`, videos, signals (OBSERVED + CALCULATED views/h) | — | — | `reelScene`: pin, scrub, **snap to labels**, clip-path + scale + text displacement + meta stagger, progress bar | counter via ref (no re-render) |
@@ -115,7 +117,7 @@ flowchart LR
 | `WhyNowSection` | Editorial why-now + evidence grid with provenance tags | cluster.ai.whyNow + metrics | — | whyNow | `steppedScene` (pinned) | none |
 | `RecommendationSection` | "So what should Ishaan make?" title, angle, format, suggested length, confidence, CTA | cluster.ai.recommendation + calculated length/confidence | — | recommendation | `steppedScene` | none |
 
-Mobile (<900px) has no pinning: every scene falls back to `revealOnScroll`, and the reel becomes a vertical list. With `prefers-reduced-motion`, scenes are not built at all and the static layout is shown.
+**Phones (<900px)** never pin (pinning fights touch scrolling and mobile toolbars). Each scene has a phone version instead: `reelMobile` (cards wipe up, titles rise), `statementMobile` and `topicRevealMobile` (scroll-scrubbed light-up and wipe), `formationMobile` (thumbnails converge as you scroll, then stats count up), `momentumMobile` (line draws, verdict lands) and `steppedMobile` (headings rise, blocks step in). With `prefers-reduced-motion`, no scene is built and the static layout is shown.
 
 ### `/trends` — Trend Intelligence (`app/trends/page.tsx`)
 
@@ -123,6 +125,8 @@ Mobile (<900px) has no pinning: every scene falls back to `revealOnScroll`, and 
 flowchart LR
     page[trends/page.tsx<br/>?run=id] --> TO[TrendOverview<br/>filters · history]
     TO --> TC[TrendCluster ×3–5]
+    TO --> RAIL[Topic rail]
+    TC --> SG[ScoreGauge]
     TC --> TM[TrendMetrics]
     TC --> CC[CreatorCoverage]
     TC --> FB[FormatBreakdown]
@@ -134,25 +138,26 @@ flowchart LR
 
 | Component | Purpose | Data | API | AI | Animation | State |
 |---|---|---|---|---|---|---|
-| `TrendOverview` | Header, sticky filter bar (category, region, lookback, momentum), run new radar, previous scans | run, history, settings | `loadPageData`, `POST /api/radar/run` | — | `revealOnScroll` on clusters | filter state (`useState`) |
-| `TrendCluster` | Rank, name, summary, score, momentum, metrics; expandable intelligence panel | `TrendCluster` | — | name, summary, whyNow, audienceSignals, narrative | GSAP height + stagger on expand | `open` (`aria-expanded`) |
-| `TrendMetrics` / `MomentumBadge` | Score, creators, videos, avg views, avg duration, engagement | `metrics` (CALCULATED) | — | — | — | none |
+| `TrendOverview` | Header, sticky filter bar (category, region, lookback, momentum), run new radar, previous scans; side rail of topics on wide screens | run, history, settings | `loadPageData`, `POST /api/radar/run` | — | `trendsIntro` (title letters rise via SplitText); `topicRail` (active topic highlighted, line fills as you read) | filter state (`useState`) |
+| `TrendCluster` | Rank, name, summary, score ring, momentum, metrics; expandable intelligence panel | `TrendCluster` | — | name, summary, whyNow, audienceSignals, narrative | `topicScene`: rank drifts (parallax), title rises word by word, ring draws, numbers count up; `detailsOpen`: blocks stagger, bars grow, chart draws, thumbnails wipe in | `open` (`aria-expanded`) |
+| `ScoreGauge` | Trend score as a ring | `score` (CALCULATED) | — | — | arc drawn with DrawSVG, number counts up | none |
+| `TrendMetrics` / `MomentumBadge` | Score, creators, videos, avg views, avg duration, engagement | `metrics` (CALCULATED) | — | — | values count up from 0 to the real number (`countIn`) | none |
 | `CreatorCoverage` | Real channel names with video count and views, linking to the channels | `creators` (OBSERVED) | — | — | — | none |
-| `FormatBreakdown` | Horizontal bars; percentages only when ≥3 classified | `formats` (AI labels → CALCULATED shares) | — | per-video format label | — | none |
-| `MomentumChart` / `ViewHistoryChart` | Uploads per day; indexed views across snapshots (only if history exists) | `momentumSeries`, `viewHistory` | — | — | path drawn by `momentumScene` on /radar | none |
-| `ScoreAnatomy` | Each factor × weight → score | `scoreBreakdown` | — | — | — | none |
-| `EvidenceVideos` | 3–5 videos: thumbnail, title, channel, views, duration, published, likes, comments | videos (OBSERVED) | — | format tag | hover scale | none |
+| `FormatBreakdown` | Horizontal bars; percentages only when ≥3 classified | `formats` (AI labels → CALCULATED shares) | — | per-video format label | bars grow (`growBars`) | none |
+| `MomentumChart` / `ViewHistoryChart` | Uploads per day; indexed views across snapshots (only if history exists) | `momentumSeries`, `viewHistory` | — | — | line draws itself (DrawSVG) | none |
+| `ScoreAnatomy` | Each factor × weight → score | `scoreBreakdown` | — | — | bars grow | none |
+| `EvidenceVideos` | 3–5 videos: thumbnail, title, channel, views, duration, published, likes, comments | videos (OBSERVED) | — | format tag | thumbnails wipe in; hover scale | none |
 | `TrendRecommendation` | What I would make · why now · possible title · format · suggested length · confidence | recommendation + calculated | — | recommendation | — | none |
 
 ### `/brief` — Sunday Brief (`app/brief/page.tsx`)
 
 | Component | Purpose | Data | API | AI | Animation | State |
 |---|---|---|---|---|---|---|
-| `BriefExperience` | Composes the report and its actions | `Brief`, `RadarRun` | `loadPageData({withBrief})` | — | `revealOnScroll` on every `[data-reveal]` | none |
-| `BriefHero` | SUNDAY BRIEF, Sunday date, region, categories, videos analysed, headline, dek | brief + run | — | headline, dek | reveal | none |
-| `TopOpportunity` | THE ONE TO WATCH: why it matters, momentum, creator coverage, recommended action | `topStory` + cluster | — | whyItMatters, action | reveal | none |
-| `BriefCluster` | 01…05: trend, why now, evidence, recommendation | `opportunities[]` + cluster videos | — | whyNow, recommendation | reveal | none |
-| `MondayPlan` | MONDAY MORNING: film this, format, angle, title, why, plus calculated backing | `mondayPlan` + cluster metrics | — | plan | reveal | none |
+| `BriefExperience` | Composes the report, builds its scenes, re-measures scroll positions once built | `Brief`, `RadarRun` | `loadPageData({withBrief})` | — | `revealOnScroll`, `riseOnScroll`, `parallaxNumbers`, `mondayScene` | none |
+| `BriefHero` | SUNDAY BRIEF, Sunday date, region, categories, videos analysed, headline, dek | brief + run | — | headline, dek | `briefIntro`: rules draw, letters rise, headline rises word by word, count-up | none |
+| `TopOpportunity` | THE ONE TO WATCH: why it matters, momentum, creator coverage, recommended action | `topStory` + cluster | — | whyItMatters, action | title rises; stats count up | none |
+| `BriefCluster` | 01…05: trend, why now, evidence, recommendation | `opportunities[]` + cluster videos | — | whyNow, recommendation | big number drifts (parallax); heading rises | none |
+| `MondayPlan` | MONDAY MORNING: film this, format, angle, title, why, plus calculated backing | `mondayPlan` + cluster metrics | — | plan | `mondayScene`: pinned finale, title grows in, each line lands in turn (pins only when it fits the screen; phones reveal as they scroll) | none |
 | `GenerateBriefButton` / `SendBriefButton` | Write or rewrite the brief; email it to the saved address | briefId, runId | `POST /api/brief/generate`, `POST /api/brief/send` | Gemini (generate) | — | busy / message |
 
 ### `/settings` (`app/settings/page.tsx`)
@@ -168,8 +173,9 @@ flowchart LR
 | Component | Purpose | State |
 |---|---|---|
 | `layout/AppShell` | Skip link, TopNav, main, footer, `RadarProvider`, `LoadingRadar` | — |
-| `layout/TopNav` | 01 Radar · 02 Trends · 03 Brief · Settings (`aria-current`) | pathname |
-| `layout/PageTransition` | Route enter animation (`app/template.tsx`) | — |
+| `layout/TopNav` | 01 Radar · 02 Trends · 03 Brief · Settings · theme button (`aria-current`); compact on phones so nothing is squeezed | pathname |
+| `layout/ThemeToggle` | Light / dark switch; dark is the default; saved in localStorage and applied before first paint by `lib/theme.ts` | theme |
+| `layout/PageTransition` | Route enter fade (`app/template.tsx`); opacity only, so pinned scenes stay fixed | — |
 | `shared/RadarProvider` | Global run state; reads the NDJSON stream; `useCurrentRun` | stage, warnings, error, session run |
 | `shared/LoadingRadar` | Full-screen scan dialog showing the server's real stages, elapsed time, warnings, errors (Esc closes) | reads context |
 | `shared/RunRadarButton` | Starts a run with optional overrides | context |
@@ -213,4 +219,30 @@ flowchart LR
 | `lib/pipeline/brief.ts` | Writes and stores the brief |
 | `lib/db/repo.ts` | All Supabase reads and writes |
 | `lib/email/brief.ts` | Brief email HTML/text; Resend REST |
-| `lib/animations/*` | GSAP registration, matchMedia conditions, scene builders |
+| `lib/trends/keyword.ts` | Short topic label for the orbit and rail (Gemini keyword, or shortened name for older scans) |
+| `lib/theme.ts` | Theme storage key and the no-flash script |
+| `lib/animations/gsap.ts` | Registers ScrollTrigger, SplitText, DrawSVG; re-measures after fonts load; `scheduleRefresh` |
+| `lib/animations/motion.ts` | matchMedia conditions (desktop / phone / reduced motion) |
+| `lib/animations/presets.ts` | Every scene builder (see below) |
+
+## 8. Motion system
+
+Components never hold large timelines. They mark their DOM with `data-*` attributes and call a builder from `lib/animations/presets.ts` inside `useGSAP` + `gsap.matchMedia`, so every ScrollTrigger is cleaned up on unmount and nothing runs with reduced motion.
+
+```mermaid
+flowchart LR
+    MM[gsap.matchMedia] -->|desktop ≥900px| D[Pinned, scrubbed scenes]
+    MM -->|phone <900px| M[Phone scenes: no pinning]
+    MM -->|reduced motion| R[No animation: static layout]
+    D --> D1[heroIntro · radarAmbient · statementScene · reelScene · topicRevealScene · formationScene · momentumScene · steppedScene]
+    D --> D2[trendsIntro · topicScene · detailsOpen · topicRail · briefIntro · parallaxNumbers · mondayScene]
+    M --> M1[reelMobile · statementMobile · topicRevealMobile · formationMobile · momentumMobile · steppedMobile]
+    D2 & M1 --> H[Helpers: splitRise · countIn · growBars · revealOnScroll · revealEach · countUp]
+```
+
+Rules that keep it reliable:
+- Only `transform`, `opacity`, `clip-path` and SVG stroke are animated.
+- Counters always finish on the real value; only the tween is visual.
+- Triggers that should play once use `toggleActions: "play none none none"` rather than `once: true`, which can remove a trigger while GSAP is still measuring the page.
+- Text split for animation is restored to plain text once it has landed, so descenders are never clipped.
+
