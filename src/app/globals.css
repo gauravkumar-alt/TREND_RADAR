@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   TREND//RADAR — Dark editorial intelligence
+   One signal colour (lime), warm off-white type, charcoal paper, hairlines.
+   --------------------------------------------------------------------------- */
+:root {
+  --bg: #0b0b0a;
+  --bg-2: #121211;
+  --bg-3: #191917;
+  --line: #262521;
+  --line-2: #383630;
+  --fg: #f2efe6;
+  --fg-2: #bcb7aa;
+  --fg-3: #858175;
+  --signal: #c6ff3d;
+  --signal-dim: #c6ff3d26;
+  --signal-ink: #0b0b0a;
+  --cool: #ff7a45;
+  --radius: 2px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-signal: var(--signal);
+  --color-signal-dim: var(--signal-dim);
+  --color-signal-ink: var(--signal-ink);
+  --color-cool: var(--cool);
+  --font-display: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+  --radius-sm: var(--radius);
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body {
+  background: var(--bg);
+  font-family: var(--font-display);
+  overflow-x: clip;
+}
+::selection {
+  background: var(--signal);
+  color: var(--signal-ink);
+}
+
+/* Focus is always visible and on-brand */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/* Hairline grid backdrop */
+.grid-lines {
+  background-image:
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.grid-fade {
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+/* Micro label used across the publication */
+.micro {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Giant display type */
+.display-xl {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.86;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Elements animated in by GSAP start visible; GSAP sets the from-state.
+   This guarantees content stays readable if JS or animation is unavailable. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 100;
+  background: var(--signal);
+  color: var(--signal-ink);
+  padding: 8px 12px;
+}
