@@ -28,6 +28,7 @@ Every insight carries exactly one label: **OBSERVED** (from the YouTube API), **
 
 1. **`/radar`: Live Radar.** A cinematic scroll story built with GSAP ScrollTrigger:
    - Hero with live scan stats and a radar plot of real videos (angle = cluster, distance = age, size = views/hour).
+   - A rotating globe inside the radar lights up the scan region (where YouTube reported these videos trending) and rings the countries the creators are based in (their listed channel country). This week's 3–4 topics orbit the radar as keyword + trend-score chips; each opens that topic on `/trends`.
    - A pinned statement: *"The internet doesn't trend one video at a time."* turns into *"It trends in conversations."*
    - **ScrollVideoReel**: five real videos rotate as you scroll (pin + scrub + snap, clip-path reveals). Each one links to `youtube.com/watch?v=…`.
    - *"But the video isn't the story. The pattern is."*
