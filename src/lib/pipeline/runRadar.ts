@@ -4,7 +4,8 @@ import { hasSupabase } from "../env";
 import { AppError, toAppError } from "../errors";
 import { runSettingsKey, toRunSettings, type Settings } from "../settings";
 import * as repo from "../db/repo";
-import { QuotaMeter, getTrendingChart, getVideoItems, searchVideoIds, toVideo } from "../youtube/client";
+import { QuotaMeter, getChannelCountries, getTrendingChart, getVideoItems, searchVideoIds, toVideo } from "../youtube/client";
+import countries from "i18n-iso-countries";
 import { analyzeClusters } from "../gemini/analyze";
 import { geminiModelName } from "../gemini/client";
 import { computeSignals, bestVelocity } from "../trends/signals";
@@ -79,6 +80,15 @@ export async function collectVideos(settings: RadarRun["settings"], meter: Quota
     if (seen.has(i.id) || i.snippet.publishedAt < publishedAfter) continue;
     videos.push(toVideo(i, { regionCode: settings.regionCode, sourceCategory: "Trending · Science & Tech", source: "trending" }));
     seen.add(i.id);
+  }
+  // Where each creator is based (their listed channel country), for the radar globe.
+  const listed = await getChannelCountries(videos.map((v) => v.channelId), meter).catch((e) => {
+    if (e instanceof AppError && e.code === "YOUTUBE_QUOTA") throw e;
+    return new Map<string, string>();
+  });
+  for (const v of videos) {
+    const alpha2 = listed.get(v.channelId);
+    v.channelCountry = alpha2 ? (countries.alpha2ToNumeric(alpha2) ?? null) : null;
   }
   return videos;
 }

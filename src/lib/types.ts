@@ -37,6 +37,8 @@ export interface Video {
   sourceCategory: string;
   /** "search" = keyword search, "trending" = mostPopular chart. */
   source: "search" | "trending";
+  /** ISO 3166-1 numeric code of the channel's listed country (channels.list). null when the creator doesn't list one. */
+  channelCountry?: string | null;
   fetchedAt: string;
 }
 

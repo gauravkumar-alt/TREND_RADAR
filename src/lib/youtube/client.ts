@@ -204,3 +204,29 @@ export async function getTrendingChart(
     return [];
   }
 }
+
+// ---- channels.list (creator country) -----------------------------------------
+const channelsResponse = z.object({
+  items: z.array(z.object({ id: z.string(), snippet: z.object({ country: z.string().optional() }).partial().default({}) })).default([]),
+});
+
+/**
+ * Listed country (ISO alpha-2) per channel, 1 unit per 50 channels. Channels
+ * that don't list a country are simply absent. Never fails a scan: on any
+ * error other than quota it returns what it has.
+ */
+export async function getChannelCountries(channelIds: string[], meter?: QuotaMeter, fetchImpl?: typeof fetch): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const unique = [...new Set(channelIds)];
+  for (let i = 0; i < unique.length; i += 50) {
+    try {
+      const body = await call("channels", { part: "snippet", id: unique.slice(i, i + 50).join(","), maxResults: 50 }, fetchImpl);
+      meter?.add(QUOTA_COST.videos);
+      for (const c of channelsResponse.parse(body).items) if (c.snippet.country) out.set(c.id, c.snippet.country.toUpperCase());
+    } catch (e) {
+      if (e instanceof AppError && e.code === "YOUTUBE_QUOTA") throw e;
+      break;
+    }
+  }
+  return out;
+}

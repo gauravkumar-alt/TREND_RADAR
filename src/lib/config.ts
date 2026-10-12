@@ -35,6 +35,24 @@ export const REGIONS: { code: string; label: string }[] = [
   { code: "BR", label: "Brazil" },
 ];
 
+/**
+ * Where each scan region sits on the globe. `iso` is the ISO 3166-1 numeric
+ * code used by the world map; small countries missing from the 1:110m map
+ * (Singapore) fall back to the point.
+ */
+export const REGION_GEO: Record<string, { iso: string; lon: number; lat: number }> = {
+  IN: { iso: "356", lon: 78.9, lat: 22.5 },
+  US: { iso: "840", lon: -98.5, lat: 39.5 },
+  GB: { iso: "826", lon: -2.5, lat: 54 },
+  CA: { iso: "124", lon: -106, lat: 56 },
+  AU: { iso: "036", lon: 134, lat: -25 },
+  SG: { iso: "702", lon: 103.8, lat: 1.35 },
+  AE: { iso: "784", lon: 54, lat: 24 },
+  DE: { iso: "276", lon: 10.4, lat: 51 },
+  ID: { iso: "360", lon: 113.9, lat: -2.5 },
+  BR: { iso: "076", lon: -52, lat: -10 },
+};
+
 export const LANGUAGES: { code: string; label: string }[] = [
   { code: "en", label: "English" },
   { code: "hi", label: "Hindi" },

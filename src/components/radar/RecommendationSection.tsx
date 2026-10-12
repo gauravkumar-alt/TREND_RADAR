@@ -29,7 +29,7 @@ export function RecommendationSection({ cluster, creatorName }: { cluster: Trend
   const r = cluster.ai.recommendation;
   const lead = cluster.formats[0];
   return (
-    <section ref={ref} className="relative flex items-center border-b border-line min-[900px]:min-h-[calc(100svh-3.5rem)]" aria-labelledby="make-title">
+    <section ref={ref} className="relative flex items-center overflow-hidden border-b border-line min-[900px]:min-h-[calc(100svh-3.5rem)]" aria-labelledby="make-title">
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-10 px-4 py-20 md:px-8">
         <h2 id="make-title" data-step className="display-xl text-[clamp(40px,6.5vw,120px)]">
           SO WHAT SHOULD <span className="text-signal">{creatorName.toUpperCase()}</span> MAKE?

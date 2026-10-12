@@ -29,7 +29,7 @@ export function MomentumSection({ cluster }: { cluster: TrendCluster }) {
   const verdictColor = cluster.momentum === "RISING" ? "text-signal" : cluster.momentum === "COOLING" ? "text-cool" : cluster.momentum === "STABLE" ? "text-fg" : "text-fg-3";
 
   return (
-    <section ref={ref} className="relative flex items-center border-b border-line min-[900px]:h-[calc(100svh-3.5rem)]" aria-labelledby="momentum-title">
+    <section ref={ref} className="relative flex items-center overflow-hidden border-b border-line min-[900px]:h-[calc(100svh-3.5rem)]" aria-labelledby="momentum-title">
       <div className="mx-auto grid w-full max-w-[1600px] gap-10 px-4 py-20 md:px-8 min-[900px]:grid-cols-[1.4fr_1fr] min-[900px]:items-center">
         <div className="flex flex-col gap-8">
           <h2 id="momentum-title" data-momentum-title data-m-reveal className="display-xl overflow-hidden text-[clamp(40px,6vw,104px)]">

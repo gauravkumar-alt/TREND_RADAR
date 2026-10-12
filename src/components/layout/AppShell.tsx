@@ -9,7 +9,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <TopNav />
-      <main id="main" className="min-h-screen pt-14">
+      <main id="main" className="min-h-screen overflow-x-clip pt-14">
         {children}
       </main>
       <footer className="border-t border-line">

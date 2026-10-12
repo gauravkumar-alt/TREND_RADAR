@@ -5,6 +5,7 @@ import { MEDIA } from "@/lib/animations/motion";
 import { radarAmbient } from "@/lib/animations/presets";
 import { bestVelocity } from "@/lib/trends/signals";
 import type { RadarRun } from "@/lib/types";
+import { WorldGlobe, type CreatorCountry } from "./WorldGlobe";
 
 /**
  * Radar plot of the latest scan. Each dot is a real video:
@@ -14,9 +15,19 @@ import type { RadarRun } from "@/lib/types";
  *   size   = log views/hour
  * With no scan, only the empty scope is drawn: no placeholder dots.
  */
-export function RadarSignalField({ run, className }: { run: RadarRun | null; className?: string }) {
+export function RadarSignalField({ run, regionCode, className }: { run: RadarRun | null; regionCode: string; className?: string }) {
   const ref = useRef<SVGSVGElement>(null);
   const { dots, clusterCount } = useMemo(() => layout(run), [run]);
+  // Distinct creators per listed country, from the videos in this scan.
+  const creators = useMemo<CreatorCountry[]>(() => {
+    if (!run) return [];
+    const byCountry = new Map<string, Set<string>>();
+    for (const v of Object.values(run.videos)) {
+      if (!v.channelCountry) continue;
+      byCountry.set(v.channelCountry, (byCountry.get(v.channelCountry) ?? new Set()).add(v.channelId));
+    }
+    return [...byCountry.entries()].map(([iso, chans]) => ({ iso, count: chans.size }));
+  }, [run]);
 
   useGSAP(
     () => {
@@ -37,6 +48,7 @@ export function RadarSignalField({ run, className }: { run: RadarRun | null; cla
           <stop offset="1" stopColor="var(--signal)" stopOpacity="0" />
         </radialGradient>
       </defs>
+      <WorldGlobe regionCode={run?.settings.regionCode ?? regionCode} creators={creators} />
       {[60, 120, 180, 240].map((r) => (
         <circle key={r} r={r} fill="none" stroke="var(--line-2)" strokeWidth="1" strokeDasharray={r === 240 ? "0" : "2 6"} />
       ))}

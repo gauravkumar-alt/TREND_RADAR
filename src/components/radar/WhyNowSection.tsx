@@ -33,7 +33,7 @@ export function WhyNowSection({ cluster, videos }: { cluster: TrendCluster; vide
     { label: "Newest upload", value: ago(m.newestUploadAt), sub: top ? `top video: ${compact(top.views)} views` : "", kind: "observed" },
   ];
   return (
-    <section ref={ref} className="relative flex items-center border-b border-line min-[900px]:h-[calc(100svh-3.5rem)]" aria-labelledby="whynow-title">
+    <section ref={ref} className="relative flex items-center overflow-hidden border-b border-line min-[900px]:h-[calc(100svh-3.5rem)]" aria-labelledby="whynow-title">
       <div className="mx-auto grid w-full max-w-[1600px] gap-12 px-4 py-20 md:px-8 min-[900px]:grid-cols-[1.25fr_1fr]">
         <div className="flex flex-col gap-8">
           <h2 id="whynow-title" data-step className="display-xl text-[clamp(56px,8vw,148px)]">

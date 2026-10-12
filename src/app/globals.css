@@ -58,6 +58,8 @@
 }
 
 html {
+  /* Scaled-in animation states must never widen the page (on phones that zooms the whole layout out). */
+  overflow-x: clip;
   background: var(--bg);
   color: var(--fg);
   -webkit-font-smoothing: antialiased;

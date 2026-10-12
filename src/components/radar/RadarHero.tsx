@@ -74,11 +74,11 @@ export function RadarHero({ run, regionCode, categories, failure }: Props) {
             </p>
           </div>
           <div className="relative mx-auto mb-4 aspect-square w-full max-w-[440px] md:absolute md:mb-0 md:right-[2vw] md:top-[44%] md:mx-0 md:w-[min(46vw,64svh,760px)] md:max-w-none md:-translate-y-1/2">
-            <RadarSignalField run={run} className="absolute inset-0 h-full w-full opacity-90" />
+            <RadarSignalField run={run} regionCode={regionCode} className="absolute inset-0 h-full w-full opacity-90" />
             {run && <TopicOrbit clusters={run.clusters} />}
             {run && run.clusters.length > 0 && (
               <p data-hero-meta className="micro absolute inset-x-0 -bottom-2 text-center text-[10px] text-fg-3 md:-bottom-6 md:text-[11px]">
-                Trend score / 100 · tap a topic to open it
+                Score / 100 · tap a topic · rings = creators’ countries
               </p>
             )}
           </div>
